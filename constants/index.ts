@@ -5,6 +5,7 @@ export const NAVIGATION_LINKS = [
   { label: 'Menu', href: '/menu' },
   { label: 'About Us', href: '/about' },
   { label: 'Delivery', href: '/menu#delivery' },
+  { label: 'Contact Us', href: '/contact' },
 ];
 
 export const BRAND_COLORS = {

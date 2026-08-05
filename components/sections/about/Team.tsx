@@ -2,58 +2,73 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { TEAM_DATA } from '@/constants';
 import Container from '../../shared/Container';
-import SectionHeading from '../../shared/SectionHeading';
 import AnimatedSection from '../../shared/AnimatedSection';
 
 export default function Team() {
+  const features = [
+    {
+      id: 'freshly-grilled',
+      image: '/chef.png',
+      alt: 'Chef grilling fish over open flames',
+      title: 'Freshly Grilled Daily',
+      description: 'Every meal is prepared fresh to order.',
+    },
+    {
+      id: 'premium-ingredients',
+      image: '/fish.png',
+      alt: 'Flat vector board filled with raw ingredients',
+      title: 'Premium Ingredients',
+      description: 'Only quality meats, seafood, herbs and spices.',
+    },
+    {
+      id: 'fast-delivery',
+      image: '/Delivery.png',
+      alt: 'Delivery courier handing a boxed meal to a customer',
+      title: 'Fast Delivery',
+      description: 'Fresh meals delivered straight to your doorstep.',
+    },
+  ];
+
   return (
-    <section className="py-24 bg-brand-bg relative overflow-hidden">
-      <Container>
-        {/* Header */}
-        <AnimatedSection direction="up" className="flex flex-col items-center">
-          <SectionHeading
-            title="Meet Our Grill Masters"
-            highlightedWord="Grill Masters"
-            subtitle="Our Culinary Team"
-            align="center"
-          />
-          <p className="font-sans text-brand-brown/70 text-sm md:text-base max-w-md text-center leading-relaxed -mt-8 mb-16">
-            The skilled hands and passionate minds behind our signature recipes, fire-grill stations, and clean operations.
-          </p>
+    <section className="py-24 bg-white relative overflow-hidden">
+      <Container className="max-w-[1200px]">
+        {/* Section Header: Elegant dark serif display */}
+        <AnimatedSection direction="up" className="flex flex-col items-center mb-12">
+          <h2 className="font-judson font-normal text-3xl sm:text-4xl md:text-[2.5rem] text-[#000000] text-center">
+            Why Choose Tylicious Grillz
+          </h2>
         </AnimatedSection>
 
-        {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {TEAM_DATA.map((member, index) => (
+        {/* 3-Column Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-12">
+          {features.map((feature, index) => (
             <AnimatedSection
-              key={member.id}
+              key={feature.id}
               direction="up"
               delay={index * 0.15}
-              className="group flex flex-col w-full text-center items-center"
+              className="flex flex-col items-center text-center"
             >
-              {/* Image Frame */}
-              <div className="relative w-full aspect-[4/5] rounded-[2rem] overflow-hidden mb-6 bg-brand-orange/5 border border-brand-orange/10 shadow-[0_8px_30px_rgba(42,3,0,0.02)]">
+              {/* Top Vector Illustration Container */}
+              <div className="relative w-48 h-48 md:w-[200px] md:h-[200px] overflow-hidden mb-6 flex items-center justify-center">
                 <Image
-                  src={member.image}
-                  alt={member.name}
+                  src={feature.image}
+                  alt={feature.alt}
                   fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  sizes="200px"
+                  className="object-contain"
                   loading="lazy"
                 />
-                
-                {/* Glow effect on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-brown/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </div>
 
-              {/* Title & Info */}
-              <h3 className="font-judson font-bold text-2xl text-brand-brown mb-1.5 group-hover:text-brand-orange transition-colors">
-                {member.name}
+              {/* Feature Title: Instrument Sans Bold in Brand Orange-Red */}
+              <h3 className="font-sans font-bold text-xl md:text-[22px] text-[#E63900] mb-2.5 tracking-tight">
+                {feature.title}
               </h3>
-              <p className="font-sans text-xs md:text-sm text-brand-orange font-semibold uppercase tracking-wider">
-                {member.role}
+
+              {/* Description Paragraph: Instrument Sans regular with max-width constraint */}
+              <p className="font-sans font-normal text-[#555555] text-[15px] md:text-base leading-relaxed max-w-[280px]">
+                {feature.description}
               </p>
             </AnimatedSection>
           ))}
