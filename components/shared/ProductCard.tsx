@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ProductCardProps } from '@/types';
+import { ProductCardProps, MenuItem } from '@/types';
 import ProductOptionsModal from './ProductOptionsModal';
 
 export default function ProductCard({
@@ -14,7 +14,14 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
-  const productObj = { id, name, description, price, image, category };
+  const productObj: MenuItem = {
+    id,
+    name,
+    description,
+    price,
+    image,
+    category: category as MenuItem['category']
+  };
 
   const handleButtonClick = () => {
     setIsOptionsOpen(true);

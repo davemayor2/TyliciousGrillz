@@ -54,7 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (savedCart) {
       try {
         setCart(JSON.parse(savedCart));
-      } catch (e) {
+      } catch {
         console.error('Failed to parse cart');
       }
     }
@@ -132,6 +132,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const triggerCheckout = async (paymentMethod: 'card' | 'apple-pay' | 'google-pay') => {
     setCheckoutStatus('processing');
+    console.log('Processing payment via:', paymentMethod);
     
     // Simulate API stripe checkout / paystack gateway processing
     await new Promise((resolve) => setTimeout(resolve, 2000));
