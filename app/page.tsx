@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import Hero from '@/components/sections/home/Hero';
+import CateringHighlight from '@/components/sections/home/CateringHighlight';
 import WhyLoveUs from '@/components/sections/home/WhyLoveUs';
 import Favorites from '@/components/sections/home/Favorites';
 import Ordering from '@/components/sections/home/Ordering';
@@ -15,6 +16,7 @@ export default function Home() {
       <Navbar />
       <main className="overflow-hidden">
         <Hero />
+        <CateringHighlight />
         <WhyLoveUs />
         <Favorites />
         <Ordering />

@@ -24,8 +24,24 @@ export default function Footer() {
               
               <div className="flex flex-col gap-2.5 font-sans text-sm text-white/80 leading-relaxed text-left">
                 <p>Phone: +123 456 7890</p>
-                <p>Address: Edinburgh Middlesbrough, London</p>
+                <p>Address: London & Kent, United Kingdom</p>
                 <p>Email: info@tyliciousgrillz.com</p>
+              </div>
+
+              {/* Service Focus Highlight */}
+              <h3 className="font-sans font-bold text-sm uppercase tracking-wider text-white mt-4">
+                Our Services
+              </h3>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 font-sans text-xs text-brand-orange uppercase font-semibold">
+                <span>Private Events</span>
+                <span className="text-white/40">•</span>
+                <span>Weddings</span>
+                <span className="text-white/40">•</span>
+                <span>Birthdays</span>
+                <span className="text-white/40">•</span>
+                <span>Corporate</span>
+                <span className="text-white/40">•</span>
+                <span>Pre-Orders</span>
               </div>
 
               <h3 className="font-sans font-bold text-sm uppercase tracking-wider text-white mt-6">
@@ -102,6 +118,24 @@ export default function Footer() {
                 <Link href="/#delivery" className="hover:text-brand-orange transition-colors duration-200">
                   Delivery
                 </Link>
+                <Link href="/privacy" className="hover:text-brand-orange transition-colors duration-200">
+                  Privacy Policy
+                </Link>
+                <Link href="/cookies" className="hover:text-brand-orange transition-colors duration-200">
+                  Cookie Policy
+                </Link>
+                <Link href="/terms" className="hover:text-brand-orange transition-colors duration-200">
+                  Terms & Conditions
+                </Link>
+                <Link href="/delivery-policy" className="hover:text-brand-orange transition-colors duration-200">
+                  Delivery Policy
+                </Link>
+                <Link href="/refund-policy" className="hover:text-brand-orange transition-colors duration-200">
+                  Refund Policy
+                </Link>
+                <Link href="/allergens" className="hover:text-brand-orange transition-colors duration-200">
+                  Allergens
+                </Link>
               </div>
             </div>
 
@@ -115,11 +149,9 @@ export default function Footer() {
             
             {/* Area Tags Row */}
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-4 font-sans text-sm text-white/80">
-              <span>Manchester</span>
-              <span>Salford</span>
-              <span>Bolton</span>
-              <span>Stockport</span>
-              <span>Oldham</span>
+              <span>London</span>
+              <span>Kent</span>
+              <span>And surrounding areas</span>
             </div>
           </div>
 

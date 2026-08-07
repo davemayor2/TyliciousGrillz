@@ -7,12 +7,17 @@ import { usePathname } from 'next/navigation';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { NAVIGATION_LINKS } from '@/constants';
 import gsap from '@/libs/gsap';
+import { useCart } from '../context/CartContext';
+import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const arrowRef = useRef<HTMLDivElement>(null);
   const hoverTlRef = useRef<gsap.core.Timeline | null>(null);
+
+  const { cart, setIsCartOpen } = useCart();
+  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleMouseEnter = () => {
     if (!arrowRef.current) return;
@@ -62,6 +67,7 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-50 transition-all duration-300">
+      <CartDrawer />
       {/* Horizontal container card with floating shadow */}
       <div className="w-full bg-brand-orange text-white px-6 md:px-8 py-2 md:py-2.5 rounded-2xl flex items-center justify-between shadow-[0_12px_40px_rgba(42,3,0,0.15)] border border-white/10 relative z-50">
         
@@ -103,11 +109,16 @@ export default function Navbar() {
         {/* Right Section (Actions) */}
         <div className="hidden md:flex items-center gap-6">
           {/* Scaled Shopping Cart Icon */}
-          <button className="relative p-2 text-white hover:scale-105 transition-transform cursor-pointer">
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-white hover:scale-105 transition-transform cursor-pointer"
+          >
             <ShoppingCart className="w-7 h-7" />
-            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-black text-white text-[11px] font-bold rounded-full flex items-center justify-center">
-              2
-            </span>
+            {totalQty > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-black text-white text-[11px] font-bold rounded-full flex items-center justify-center">
+                {totalQty}
+              </span>
+            )}
           </button>
 
           {/* Enlarged, flat Order Now Button with weight 600 and letter-spacing -0.01em */}
@@ -139,11 +150,16 @@ export default function Navbar() {
 
         {/* Mobile Action Controls */}
         <div className="flex md:hidden items-center gap-4">
-          <button className="relative p-2 text-white">
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="relative p-2 text-white"
+          >
             <ShoppingCart className="w-7 h-7" />
-            <span className="absolute top-0 right-0 w-4 h-4 bg-black text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-              2
-            </span>
+            {totalQty > 0 && (
+              <span className="absolute top-0 right-0 w-4 h-4 bg-black text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                {totalQty}
+              </span>
+            )}
           </button>
           
           <button

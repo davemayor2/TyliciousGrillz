@@ -3,6 +3,7 @@ import { MenuItem, Testimonial, WhyLoveUsCard, TeamMember } from '../types';
 export const NAVIGATION_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Menu', href: '/menu' },
+  { label: 'Catering', href: '/catering' },
   { label: 'About Us', href: '/about' },
   { label: 'Delivery', href: '/menu#delivery' },
   { label: 'Contact Us', href: '/contact' },
@@ -86,8 +87,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
     name: 'Smoked BBQ Pork Ribs',
     description: 'Tender baby back ribs slow-cooked for 6 hours, glazed with our rich sticky house honey-BBQ sauce.',
     price: 85,
-    image: '/images/rs=w_1160,h_1536.webp',
-    category: 'bbq',
+    image: '/images/rs=w_1536.webp',
+    category: 'specials',
     popular: true,
   },
   {
@@ -96,7 +97,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     description: 'Juicy chunks of chicken breast marinated in Suya spice, grilled with fresh bell peppers and onions.',
     price: 35,
     image: '/images/Frame 153.png',
-    category: 'bbq',
+    category: 'specials',
     spicy: true,
   },
   {
@@ -121,7 +122,23 @@ export const FULL_MENU_DATA: MenuItem[] = [
     description: 'Our refreshing signature punch blend of bitters, citrus juice, soda, and fresh cucumber garnish.',
     price: 12,
     image: '/images/rs=w_1160,h_1150.webp',
-    category: 'drinks',
+    category: 'sides',
+  },
+  {
+    id: 'family-catering-platter',
+    name: 'Tylicious Family Platter',
+    description: 'Serves 4-6. Includes whole grilled croaker fish, BBQ pork ribs, chicken skewers, fries, plantains, and corn.',
+    price: 180,
+    image: '/images/about us (2).png',
+    category: 'catering',
+  },
+  {
+    id: 'mega-party-platter',
+    name: 'Mega Wedding Feast Platter',
+    description: 'Serves 8-10. Grand selection of grilled lobster tails, jumbo prawns, whole croaker fish, BBQ wings, ribs, and sides.',
+    price: 320,
+    image: '/images/about us (2).png',
+    category: 'catering',
   },
 ];
 

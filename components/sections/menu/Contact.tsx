@@ -54,7 +54,7 @@ export default function Contact() {
               <p className="font-sans text-brand-brown/75 text-sm md:text-base mb-4">
                 Come pick up your orders or dine-in.
               </p>
-              <span className="font-sans font-bold text-base text-brand-brown">12 Victoria Island, Lagos</span>
+              <span className="font-sans font-bold text-base text-brand-brown">London, Kent, and surrounding areas</span>
             </Card>
           </AnimatedSection>
 

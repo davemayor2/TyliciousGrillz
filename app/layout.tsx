@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Judson, Instrument_Sans } from "next/font/google";
+import { CartProvider } from "@/components/context/CartContext";
+import CookieBanner from "@/components/shared/CookieBanner";
 import "./globals.css";
 
 const judson = Judson({
@@ -36,7 +38,10 @@ export default function RootLayout({
       <body
         className={`${judson.variable} ${instrumentSans.variable} font-sans bg-brand-bg text-brand-brown antialiased selection:bg-brand-orange selection:text-white`}
       >
-        {children}
+        <CartProvider>
+          {children}
+          <CookieBanner />
+        </CartProvider>
       </body>
     </html>
   );

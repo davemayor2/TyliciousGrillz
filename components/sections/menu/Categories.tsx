@@ -13,24 +13,24 @@ interface CategoriesProps {
 export default function Categories({ activeCategory, onSelectCategory }: CategoriesProps) {
   const categories = [
     {
-      id: 'fish',
-      label: 'Grilled\nFish',
-      image: '/images/rs=w_1160,h_1773.webp',
-    },
-    {
       id: 'specials',
       label: 'Grill\nSpecials',
       image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
     },
     {
-      id: 'bbq',
-      label: 'Lamb &\nTurkey',
-      image: '/images/rs=w_1160,h_1532.webp',
+      id: 'fish',
+      label: 'Fish',
+      image: '/images/rs=w_1160,h_1773.webp',
     },
     {
-      id: 'drinks',
-      label: 'Drinks',
-      image: '/images/rs=w_1160,h_1150.webp',
+      id: 'sides',
+      label: 'Sides',
+      image: '/images/Rectangle 24.png',
+    },
+    {
+      id: 'catering',
+      label: 'Catering &\nPlatters',
+      image: '/images/about us (2).png',
     },
   ];
 
