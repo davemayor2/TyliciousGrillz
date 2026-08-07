@@ -51,7 +51,7 @@ export default function CateringHighlight() {
         </AnimatedSection>
 
         {/* 4-Column Grid Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {offerings.map((offering, index) => (
             <AnimatedSection
               key={offering.id}
@@ -59,34 +59,28 @@ export default function CateringHighlight() {
               delay={index * 0.1}
               className="w-full flex"
             >
-              {/* Card Container - White Base with thick outline and 3D offset pink shadow */}
-              <div className="w-full bg-white border-2 border-[#1A0500] rounded-[28px] p-6 md:p-8 flex flex-col justify-between items-start text-left shadow-[4px_4px_0px_#FF8A8A] hover:-translate-y-1.5 hover:-translate-x-1.5 hover:shadow-[8px_8px_0px_#FF8A8A] transition-all duration-200 select-none">
+              {/* Card Container - White Base with rounded-32px, no border, and solid offset pink shadow */}
+              <div className="w-full bg-white rounded-[32px] p-8 flex flex-col justify-between items-start text-left shadow-[10px_10px_0px_#FFE4E6] hover:-translate-y-1.5 hover:-translate-x-1.5 hover:shadow-[14px_14px_0px_#FFE4E6] transition-all duration-300 select-none">
                 
                 {/* Top Content Stack */}
-                <div className="w-full">
-                  {/* Emoji Visual Badge */}
-                  <div className="w-12 h-12 rounded-2xl bg-[#FFF5F5] border border-[#FF8A8A]/30 flex items-center justify-center text-2xl mb-5">
-                    {offering.icon}
-                  </div>
-                  
+                <div className="w-full flex-1 flex flex-col">
                   {/* Title: Instrument Sans Bold */}
-                  <h3 className="font-sans font-bold text-lg md:text-xl text-[#000000] mb-3 leading-snug tracking-tight">
+                  <h3 className="font-sans font-bold text-xl text-[#000000] mb-3 leading-snug tracking-tight">
                     {offering.title}
                   </h3>
                   
                   {/* Description: Instrument Sans regular */}
-                  <p className="font-sans font-normal text-[#555555] text-sm md:text-[14px] leading-relaxed mb-6">
+                  <p className="font-sans font-normal text-[#555555] text-[14px] leading-relaxed mb-6">
                     {offering.description}
                   </p>
                 </div>
 
-                {/* Bottom CTA Link */}
+                {/* Bottom CTA Link - Book service */}
                 <Link
-                  href="/contact"
-                  className="inline-flex items-center text-xs md:text-sm font-bold font-sans uppercase tracking-wider text-[#E63900] hover:text-[#ff440a] transition-colors duration-200 mt-2 gap-1.5 group/link"
+                  href="/catering"
+                  className="font-sans font-bold text-lg text-[#E63900] hover:text-[#ff440a] transition-colors duration-200 mt-2"
                 >
-                  <span>Inquire / Book Service</span>
-                  <span className="inline-block transition-transform duration-200 group-hover/link:translate-x-1">→</span>
+                  Book service
                 </Link>
 
               </div>
