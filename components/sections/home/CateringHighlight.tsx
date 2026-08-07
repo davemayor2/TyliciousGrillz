@@ -63,24 +63,30 @@ export default function CateringHighlight() {
               <div className="w-full bg-white rounded-[32px] p-8 flex flex-col justify-between items-start text-left shadow-[10px_10px_0px_#FFE4E6] hover:-translate-y-1.5 hover:-translate-x-1.5 hover:shadow-[14px_14px_0px_#FFE4E6] transition-all duration-300 select-none">
                 
                 {/* Top Content Stack */}
-                <div className="w-full flex-1 flex flex-col">
+                <div className="w-full">
+                  {/* Emoji Visual Badge */}
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFF5F5] border border-[#FF8A8A]/30 flex items-center justify-center text-2xl mb-5">
+                    {offering.icon}
+                  </div>
+                  
                   {/* Title: Instrument Sans Bold */}
-                  <h3 className="font-sans font-bold text-xl text-[#000000] mb-3 leading-snug tracking-tight">
+                  <h3 className="font-sans font-bold text-lg md:text-xl text-[#000000] mb-3 leading-snug tracking-tight">
                     {offering.title}
                   </h3>
                   
                   {/* Description: Instrument Sans regular */}
-                  <p className="font-sans font-normal text-[#555555] text-[14px] leading-relaxed mb-6">
+                  <p className="font-sans font-normal text-[#555555] text-sm md:text-[14px] leading-relaxed mb-6">
                     {offering.description}
                   </p>
                 </div>
 
-                {/* Bottom CTA Link - Book service */}
+                {/* Bottom CTA Link */}
                 <Link
                   href="/catering"
-                  className="font-sans font-bold text-lg text-[#E63900] hover:text-[#ff440a] transition-colors duration-200 mt-2"
+                  className="inline-flex items-center text-xs md:text-sm font-bold font-sans uppercase tracking-wider text-[#E63900] hover:text-[#ff440a] transition-colors duration-200 mt-2 gap-1.5 group/link"
                 >
-                  Book service
+                  <span>Inquire / Book Service</span>
+                  <span className="inline-block transition-transform duration-200 group-hover/link:translate-x-1">→</span>
                 </Link>
 
               </div>
