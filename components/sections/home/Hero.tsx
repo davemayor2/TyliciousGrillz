@@ -170,15 +170,15 @@ export default function Hero() {
           </p>
 
           {/* Call to Action Buttons */}
-          <div className="animate-hero-item flex items-center gap-4 mt-8">
+          <div className="animate-hero-item flex flex-wrap items-center gap-4 mt-8">
             {/* Primary Order Online Button */}
             <Link
               href="/menu"
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              className="inline-flex items-center justify-center h-12 bg-[#E63900] text-white hover:bg-[#ff440a] rounded-full pl-6 pr-2 font-sans font-semibold transition-all duration-200 group select-none shadow-none border border-transparent"
+              className="inline-flex items-center justify-center h-12 bg-[#E63900] text-white hover:bg-[#ff440a] rounded-full pl-6 pr-2 font-sans font-semibold transition-all duration-200 group select-none shadow-none border border-transparent whitespace-nowrap"
             >
-              <span>Order Online</span>
+              <span className="whitespace-nowrap">Order Online</span>
               <div className="ml-3.5 w-8 h-8 bg-white rounded-full flex items-center justify-center text-[#E63900] shrink-0 overflow-hidden relative">
                 <div ref={arrowRef} className="flex items-center justify-center">
                   <svg
@@ -203,7 +203,7 @@ export default function Hero() {
               ref={secondaryBtnRef}
               onMouseEnter={handleSecondaryMouseEnter}
               onMouseLeave={handleSecondaryMouseLeave}
-              className="relative overflow-hidden inline-flex items-center justify-center h-12 border-[1.5px] border-white rounded-full px-8 select-none transition-all duration-200 cursor-pointer"
+              className="relative overflow-hidden inline-flex items-center justify-center h-12 border-[1.5px] border-white rounded-full px-8 select-none transition-all duration-200 cursor-pointer whitespace-nowrap"
             >
               {/* Curved/Circular Fill Layer */}
               <div
@@ -214,7 +214,7 @@ export default function Hero() {
               {/* Text Layer */}
               <span
                 ref={secondaryTextRef}
-                className="relative z-10 text-white font-sans font-semibold text-base md:text-lg transition-colors duration-200"
+                className="relative z-10 text-white font-sans font-semibold text-base md:text-lg transition-colors duration-200 whitespace-nowrap"
               >
                 Book Catering
               </span>
