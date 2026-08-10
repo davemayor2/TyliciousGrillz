@@ -21,11 +21,10 @@ export default function Navbar() {
     if (!menuRef.current) return;
 
     const links = menuRef.current.querySelectorAll('.mobile-nav-link');
-    const button = menuRef.current.querySelector('.mobile-nav-btn');
 
     if (isOpen) {
       // Open animation: Slide container in smoothly from left and fade its opacity from 0 to 1 over 0.4s
-      gsap.killTweensOf([menuRef.current, links, button]);
+      gsap.killTweensOf([menuRef.current, links]);
       
       // Ensure element is visible
       gsap.set(menuRef.current, { pointerEvents: 'auto' });
@@ -58,26 +57,11 @@ export default function Navbar() {
           delay: 0.1,
         }
       );
-
-      // Staggered Button Entrance
-      gsap.fromTo(button,
-        {
-          x: -15,
-          opacity: 0,
-        },
-        {
-          x: 0,
-          opacity: 1,
-          duration: 0.3,
-          ease: 'power2.out',
-          delay: 0.1 + (links.length * 0.05),
-        }
-      );
     } else {
       // Clean Exit: reverse fade-out/slide-left transition
-      gsap.killTweensOf([menuRef.current, links, button]);
+      gsap.killTweensOf([menuRef.current, links]);
 
-      gsap.to([links, button], {
+      gsap.to(links, {
         x: -15,
         opacity: 0,
         duration: 0.2,
@@ -275,7 +259,7 @@ export default function Navbar() {
         <Link
           href="/menu"
           onClick={() => setIsOpen(false)}
-          className="mobile-nav-btn inline-flex items-center justify-center w-full bg-brand-orange text-white rounded-full py-4 text-lg font-sans font-bold transition-all duration-200 group select-none shadow-none opacity-0"
+          className="inline-flex items-center justify-center w-full bg-brand-orange text-white rounded-full py-4 text-lg font-sans font-bold transition-all duration-200 group select-none shadow-none"
         >
           <span>Order Now</span>
           <svg
