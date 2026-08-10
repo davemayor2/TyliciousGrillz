@@ -106,7 +106,7 @@ export default function CartDrawer() {
           x: '0%',
           opacity: 1,
           duration: 0.45,
-          ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          ease: 'power4.out',
         },
         0.1 // 0.1s overlap/stagger delay
       );
@@ -123,7 +123,7 @@ export default function CartDrawer() {
             opacity: 1,
             stagger: 0.04,
             duration: 0.35,
-            ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            ease: 'power4.out',
           },
           0.15 // overlapping during slide in of main card
         );
