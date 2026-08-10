@@ -146,10 +146,16 @@ export default function Ordering() {
               <div className="absolute inset-0 bg-[#FFEAE6] rounded-[28px] translate-x-4 translate-y-4 z-0" />
               
               {/* Front Main Layer (Video Frame) */}
-              <div className="relative z-10 w-full aspect-[4/3] bg-[#D9D9D9] rounded-[24px] overflow-hidden flex items-center justify-center shadow-md">
-                <span className="font-sans font-bold text-xl md:text-2xl text-brand-brown tracking-tight">
-                  Video Placeholder
-                </span>
+              <div className="relative z-10 w-full aspect-[4/3] bg-black rounded-[24px] overflow-hidden flex items-center justify-center shadow-md">
+                <video
+                  src="/Home page video 1.mp4"
+                  controls
+                  loop
+                  muted
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
               </div>
             </AnimatedSection>
           </div>
