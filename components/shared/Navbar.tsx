@@ -15,6 +15,86 @@ export default function Navbar() {
   const pathname = usePathname();
   const arrowRef = useRef<HTMLDivElement>(null);
   const hoverTlRef = useRef<gsap.core.Timeline | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!menuRef.current) return;
+
+    const links = menuRef.current.querySelectorAll('.mobile-nav-link');
+    const button = menuRef.current.querySelector('.mobile-nav-btn');
+
+    if (isOpen) {
+      // Open animation: Slide container in smoothly from left and fade its opacity from 0 to 1 over 0.4s
+      gsap.killTweensOf([menuRef.current, links, button]);
+      
+      // Ensure element is visible
+      gsap.set(menuRef.current, { pointerEvents: 'auto' });
+
+      gsap.fromTo(menuRef.current,
+        {
+          x: -30,
+          opacity: 0,
+        },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.4,
+          ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        }
+      );
+
+      // Staggered Link Entrance: translateX(-15px) to 0, opacity 0 to 1, delay 0.05s stagger
+      gsap.fromTo(links,
+        {
+          x: -15,
+          opacity: 0,
+        },
+        {
+          x: 0,
+          opacity: 1,
+          stagger: 0.05,
+          duration: 0.3,
+          ease: 'power2.out',
+          delay: 0.1,
+        }
+      );
+
+      // Staggered Button Entrance
+      gsap.fromTo(button,
+        {
+          x: -15,
+          opacity: 0,
+        },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.3,
+          ease: 'power2.out',
+          delay: 0.1 + (links.length * 0.05),
+        }
+      );
+    } else {
+      // Clean Exit: reverse fade-out/slide-left transition
+      gsap.killTweensOf([menuRef.current, links, button]);
+
+      gsap.to([links, button], {
+        x: -15,
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.in',
+      });
+
+      gsap.to(menuRef.current, {
+        x: -30,
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          gsap.set(menuRef.current, { pointerEvents: 'none' });
+        }
+      });
+    }
+  }, [isOpen]);
 
   const { cart, setIsCartOpen } = useCart();
   const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -172,45 +252,46 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Floating Dropdown Menu Card */}
-      {isOpen && (
-        <div className="absolute top-[calc(100%+0.5rem)] left-0 w-full bg-brand-brown text-white rounded-2xl p-6 border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.3)] flex flex-col items-center gap-6 z-45 animate-in fade-in slide-in-from-top-2 duration-200">
-          {NAVIGATION_LINKS.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className={`font-sans text-lg tracking-wide uppercase transition-colors ${
-                  isActive ? 'font-bold text-brand-orange' : 'font-semibold text-white/80 hover:text-white'
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-          
-          <Link
-            href="/menu"
-            onClick={() => setIsOpen(false)}
-            className="inline-flex items-center justify-center w-full bg-brand-orange text-white rounded-full py-4 text-lg font-sans font-bold transition-all duration-200 group select-none shadow-none"
-          >
-            <span>Order Now</span>
-            <svg
-              className="w-5 h-5 ml-2 group-hover:translate-x-0.5 transition-transform"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+      <div
+        ref={menuRef}
+        className="absolute top-[calc(100%+0.5rem)] left-0 w-full bg-brand-brown text-white rounded-2xl p-6 border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.3)] flex flex-col items-center gap-6 z-45 pointer-events-none opacity-0"
+      >
+        {NAVIGATION_LINKS.map((link) => {
+          const isActive = pathname === link.href;
+          return (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              className={`mobile-nav-link font-sans text-lg tracking-wide uppercase transition-colors opacity-0 ${
+                isActive ? 'font-bold text-brand-orange' : 'font-semibold text-white/80 hover:text-white'
+              }`}
             >
-              <path
-                d="M14 5C14 5.742 14.733 6.85 15.475 7.78C16.429 8.98 17.569 10.027 18.876 10.826C19.856 11.425 21.044 12 22 12M2 12L22 12C21.044 12 19.855 12.575 18.876 13.174C17.569 13.974 16.429 15.021 15.475 16.219C14.733 17.15 14 18.26 14 19"
-                stroke="currentColor"
-                strokeWidth={3}
-              />
-            </svg>
-          </Link>
-        </div>
-      )}
+              {link.label}
+            </Link>
+          );
+        })}
+        
+        <Link
+          href="/menu"
+          onClick={() => setIsOpen(false)}
+          className="mobile-nav-btn inline-flex items-center justify-center w-full bg-brand-orange text-white rounded-full py-4 text-lg font-sans font-bold transition-all duration-200 group select-none shadow-none opacity-0"
+        >
+          <span>Order Now</span>
+          <svg
+            className="w-5 h-5 ml-2 group-hover:translate-x-0.5 transition-transform"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14 5C14 5.742 14.733 6.85 15.475 7.78C16.429 8.98 17.569 10.027 18.876 10.826C19.856 11.425 21.044 12 22 12M2 12L22 12C21.044 12 19.855 12.575 18.876 13.174C17.569 13.974 16.429 15.021 15.475 16.219C14.733 17.15 14 18.26 14 19"
+              stroke="currentColor"
+              strokeWidth={3}
+            />
+          </svg>
+        </Link>
+      </div>
     </header>
   );
 }
