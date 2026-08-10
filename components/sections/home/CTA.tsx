@@ -83,7 +83,7 @@ export default function CTA() {
           <AnimatedSection direction="up" className="flex flex-col items-center">
             
             {/* Main Heading: Elegant white serif display font (Judson) */}
-            <h2 className="font-judson font-normal text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] leading-[1.15] text-white tracking-wide mb-4 max-w-2xl">
+            <h2 className="font-judson font-normal text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] leading-[1.15] text-white tracking-wide mb-4 max-w-4xl">
               Ready To Experience The Best <br />
               Grilled Flavours In Town?
             </h2>
