@@ -146,7 +146,7 @@ export default function Ordering() {
               <div className="absolute inset-0 bg-[#FFEAE6] rounded-[28px] translate-x-4 translate-y-4 z-0" />
               
               {/* Front Main Layer (Video Frame) */}
-              <div className="relative z-10 w-full aspect-[4/3] bg-black rounded-[24px] overflow-hidden flex items-center justify-center shadow-md">
+              <div suppressHydrationWarning className="relative z-10 w-full aspect-[4/3] bg-black rounded-[24px] overflow-hidden flex items-center justify-center shadow-md">
                 <video
                   src="/Home page video 1.mp4"
                   controls
@@ -154,6 +154,7 @@ export default function Ordering() {
                   muted
                   autoPlay
                   playsInline
+                  suppressHydrationWarning
                   className="w-full h-full object-cover"
                 />
               </div>
