@@ -4,6 +4,7 @@ import { CartProvider } from "@/components/context/CartContext";
 import CookieBanner from "@/components/shared/CookieBanner";
 import MobileStickyCart from "@/components/shared/MobileStickyCart";
 import WhatsAppWidget from "@/components/shared/WhatsAppWidget";
+import CartDrawer from "@/components/shared/CartDrawer";
 import "./globals.css";
 
 const judson = Judson({
@@ -101,6 +102,7 @@ export default function RootLayout({
         <CartProvider>
           {children}
           <CookieBanner />
+          <CartDrawer />
           <MobileStickyCart />
           <WhatsAppWidget />
         </CartProvider>

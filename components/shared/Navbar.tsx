@@ -8,7 +8,6 @@ import { ShoppingCart, Menu, X } from 'lucide-react';
 import { NAVIGATION_LINKS } from '@/constants';
 import gsap from '@/libs/gsap';
 import { useCart } from '../context/CartContext';
-import CartDrawer from './CartDrawer';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -131,7 +130,6 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-50 transition-all duration-300">
-      <CartDrawer />
       {/* Horizontal container card with floating shadow */}
       <div className="w-full bg-brand-orange text-white px-6 md:px-8 py-2 md:py-2.5 rounded-2xl flex items-center justify-between shadow-[0_12px_40px_rgba(42,3,0,0.15)] border border-white/10 relative z-50">
         
