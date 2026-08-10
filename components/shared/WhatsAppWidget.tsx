@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useCart } from '../context/CartContext';
 
 export default function WhatsAppWidget() {
   const [showTooltip, setShowTooltip] = useState(false);
+  const { cart } = useCart();
 
   useEffect(() => {
     // Show tooltip after 4 seconds to catch user's eye
@@ -18,8 +20,12 @@ export default function WhatsAppWidget() {
     window.open('https://wa.me/2348123456789?text=Hello%20Tylicious%20Grillz,%20I%20would%20like%20to%20inquire%20about%20ordering.', '_blank');
   };
 
+  const hasItems = cart.length > 0;
+
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+    <div className={`fixed right-6 z-40 flex flex-col items-end gap-2 transition-all duration-300 ${
+      hasItems ? 'bottom-[92px] md:bottom-6' : 'bottom-6'
+    }`}>
       {/* Tooltip */}
       {showTooltip && (
         <div className="relative bg-[#1A0500] text-white border border-brand-orange/20 text-[11px] md:text-xs font-sans font-semibold px-4 py-2 rounded-2xl shadow-xl animate-fade-in max-w-[200px] text-right">
