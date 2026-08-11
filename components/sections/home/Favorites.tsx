@@ -47,6 +47,7 @@ export default function Favorites() {
                 price={product.price}
                 image={product.image}
                 category={product.category}
+                video={product.video}
                 onAddToCart={() => handleAddToCart(product.name)}
               />
             </AnimatedSection>

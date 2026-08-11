@@ -47,6 +47,7 @@ export interface ProductCardProps {
   price: number;
   image: string;
   category: string;
+  video?: string;
   onAddToCart?: () => void;
 }
 
@@ -83,6 +84,7 @@ export interface MenuItem {
   category: 'fish' | 'specials' | 'sides' | 'catering';
   popular?: boolean;
   spicy?: boolean;
+  video?: string;
 }
 
 export interface Testimonial {

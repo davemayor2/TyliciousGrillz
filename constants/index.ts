@@ -81,6 +81,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
     category: 'specials',
     popular: true,
+    video: '/vids/Tylicious Seafood Platter.mp4',
   },
   {
     id: 'bbq-pork-ribs',
