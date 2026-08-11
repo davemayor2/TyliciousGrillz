@@ -14,7 +14,6 @@ export default function ProductCard({
   onAddToCart,
 }: ProductCardProps) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -40,10 +39,8 @@ export default function ProductCard({
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              setIsPlaying(true);
               videoEl.play().catch(() => {});
             } else {
-              setIsPlaying(false);
               videoEl.pause();
               videoEl.currentTime = 0;
             }
@@ -65,7 +62,6 @@ export default function ProductCard({
     if (!video || !videoRef.current) return;
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     if (!isMobile) {
-      setIsPlaying(true);
       videoRef.current.play().catch(() => {});
     }
   };
@@ -74,7 +70,6 @@ export default function ProductCard({
     if (!video || !videoRef.current) return;
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     if (!isMobile) {
-      setIsPlaying(false);
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
@@ -97,27 +92,24 @@ export default function ProductCard({
           onMouseLeave={handleMouseLeave}
           className="relative w-full aspect-[4/3] rounded-[20px] md:rounded-[24px] overflow-hidden bg-[#FFF5F5] border border-brand-orange/5 shadow-sm"
         >
-          {/* Static Image Base */}
-          <Image
-            src={image}
-            alt={name}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
-          />
-
-          {/* Autoplay Video Overlay */}
-          {video && (
+          {video ? (
             <video
               ref={videoRef}
               src={video}
               loop
               muted
               playsInline
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 pointer-events-none ${
-                isPlaying ? 'opacity-100' : 'opacity-0'
-              }`}
+              preload="metadata"
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-700 group-hover:scale-105"
+            />
+          ) : (
+            <Image
+              src={image}
+              alt={name}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
             />
           )}
         </div>
