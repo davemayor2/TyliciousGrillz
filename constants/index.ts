@@ -44,12 +44,13 @@ export const WHY_LOVE_US_DATA: WhyLoveUsCard[] = [
 export const FAVORITES_DATA: MenuItem[] = [
   {
     id: 'grilled-fish',
-    name: 'Grilled Fish',
-    description: 'Fresh whole fish grilled to perfection with Tylicious signature blend of spices, served with golden fries or spicy plantains.',
+    name: 'Grilled Catfish',
+    description: 'Premium whole Catfish grilled to perfection with Tylicious signature blend of spices, served with golden fries or spicy plantains.',
     price: 50,
     image: '/images/rs=w_1160,h_1218.webp',
     category: 'fish',
     popular: true,
+    video: '/vids/catfish.mp4',
   },
   {
     id: 'grilled-tilapia',
@@ -59,6 +60,7 @@ export const FAVORITES_DATA: MenuItem[] = [
     image: '/images/rs=w_1160,h_1257.webp',
     category: 'fish',
     popular: true,
+    video: '/vids/grilled_tilapia.mp4',
   },
   {
     id: 'grilled-croaker',
@@ -68,6 +70,7 @@ export const FAVORITES_DATA: MenuItem[] = [
     image: '/images/rs=w_1160,h_1532.webp',
     category: 'fish',
     popular: true,
+    video: '/vids/grilled_croaker.mp4',
   },
 ];
 
@@ -100,6 +103,18 @@ export const FULL_MENU_DATA: MenuItem[] = [
     image: '/images/Frame 153.png',
     category: 'specials',
     spicy: true,
+    video: '/vids/chicken_wings.mp4',
+  },
+  {
+    id: 'sizzling-suya',
+    name: 'Sizzling Suya',
+    description: 'Succulent beef strips seasoned with authentic Nigerian Suya spice, grilled over red-hot charcoal.',
+    price: 45,
+    image: '/images/Frame 153.png',
+    category: 'specials',
+    popular: true,
+    spicy: true,
+    video: '/vids/suya_vid.mp4',
   },
   {
     id: 'sweet-potato-fries',
