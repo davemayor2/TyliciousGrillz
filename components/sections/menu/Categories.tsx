@@ -22,16 +22,6 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
       label: 'Grill\nSpecials',
       image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
     },
-    {
-      id: 'sides',
-      label: 'Sides',
-      image: '/images/Rectangle 24.png',
-    },
-    {
-      id: 'catering',
-      label: 'Catering &\nPlatters',
-      image: '/images/about us (2).png',
-    },
   ];
 
   const handleCategoryClick = (catId: string) => {
@@ -54,8 +44,8 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
           </div>
         </div>
 
-        {/* 4-Column Category Pill Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto items-center">
+        {/* 2-Column Category Pill Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto items-center">
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (

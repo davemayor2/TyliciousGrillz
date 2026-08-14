@@ -123,7 +123,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     description: 'Sizzling tender turkey wings char-grilled with our house spices.',
     price: 50,
     image: '/vids/turkey_thumbnail.jpg',
-    category: 'sides',
+    category: 'specials',
     video: '/vids/turkey_vid.mp4',
   },
 ];
