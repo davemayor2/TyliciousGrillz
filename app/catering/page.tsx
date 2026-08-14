@@ -34,7 +34,7 @@ export default function CateringPage() {
         { scale: 1.08 },
         { scale: 1, duration: 1.8, ease: 'power2.out' }
       );
-      
+
       // Staggered reveal for text content
       gsap.fromTo(
         '.animate-catering-hero',
@@ -76,7 +76,7 @@ export default function CateringPage() {
   const handleMouseEnter = () => {
     if (!iconRef.current) return;
     if (buttonHoverTlRef.current) buttonHoverTlRef.current.kill();
-    
+
     buttonHoverTlRef.current = gsap.timeline();
     buttonHoverTlRef.current
       .to(iconRef.current, {
@@ -119,7 +119,7 @@ export default function CateringPage() {
   const menuChoices = [
     'Grilled Tilapia Fish',
     'Grilled Croaker Fish',
-    'Smoked BBQ Pork Ribs',
+    'Grilled Lamb Chops',
     'Spicy Chicken Skewers',
     'Sweet Potato Fries',
     'Charcoal Grilled Sweetcorn',
@@ -130,7 +130,7 @@ export default function CateringPage() {
     <>
       <Navbar />
       <main ref={contentRef} className="overflow-hidden bg-[#FFF5F3]">
-        
+
         {/* Catering Hero Section */}
         <section className="relative w-full flex flex-col items-center justify-center overflow-hidden pt-[150px] pb-20 border-none">
           <div ref={bgRef} className="absolute inset-0 z-0">
@@ -160,7 +160,7 @@ export default function CateringPage() {
         {/* Interactive Catering Enquiry Form Section */}
         <section className="py-20 flex flex-col items-center px-6">
           <div className="w-full max-w-[680px] bg-white border-2 border-[#1A0500] rounded-[32px] p-8 md:p-12 shadow-[8px_8px_0px_#FF8A8A]">
-            
+
             <div className="text-center mb-8">
               <h2 className="font-judson font-normal text-3xl md:text-[36px] text-black mb-1.5 leading-tight">
                 Catering Enquiry
@@ -171,7 +171,7 @@ export default function CateringPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              
+
               {/* Row 1: Name and Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
                 <div className="flex flex-col items-start">
@@ -310,15 +310,13 @@ export default function CateringPage() {
                         key={choice}
                         type="button"
                         onClick={() => handleMenuToggle(choice)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-full border-2 font-sans text-sm text-left transition-all duration-150 cursor-pointer select-none ${
-                          isSelected
+                        className={`flex items-center gap-3 px-4 py-3 rounded-full border-2 font-sans text-sm text-left transition-all duration-150 cursor-pointer select-none ${isSelected
                             ? 'bg-[#FFF5F5] border-[#1A0500] font-semibold text-[#1A0500] shadow-[2px_2px_0px_#1A0500]'
                             : 'bg-white border-[#FF8A8A] text-[#555555] hover:border-[#1A0500]'
-                        }`}
+                          }`}
                       >
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                          isSelected ? 'bg-[#E63900] border-[#1A0500]' : 'border-[#FF8A8A] bg-white'
-                        }`}>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? 'bg-[#E63900] border-[#1A0500]' : 'border-[#FF8A8A] bg-white'
+                          }`}>
                           {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                         <span>{choice}</span>
@@ -355,7 +353,7 @@ export default function CateringPage() {
                   <div className="ml-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shrink-0 overflow-hidden relative">
                     <div ref={iconRef} className="flex items-center justify-center">
                       <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M23.38 2.71036C24.5654 2.29619 25.704 3.43486 25.2899 4.62019L18.3774 24.3719C17.9282 25.6529 16.1432 25.7252 15.5925 24.485L12.257 16.981L16.9517 12.2852C17.1063 12.1193 17.1904 11.8999 17.1864 11.6732C17.1824 11.4466 17.0906 11.2303 16.9303 11.07C16.7699 10.9096 16.5537 10.8178 16.327 10.8138C16.1003 10.8098 15.8809 10.894 15.715 11.0485L11.0192 15.7432L3.5152 12.4077C2.27503 11.8559 2.34853 10.072 3.62837 9.62286L23.38 2.71036Z" fill="#ED2C02"/>
+                        <path d="M23.38 2.71036C24.5654 2.29619 25.704 3.43486 25.2899 4.62019L18.3774 24.3719C17.9282 25.6529 16.1432 25.7252 15.5925 24.485L12.257 16.981L16.9517 12.2852C17.1063 12.1193 17.1904 11.8999 17.1864 11.6732C17.1824 11.4466 17.0906 11.2303 16.9303 11.07C16.7699 10.9096 16.5537 10.8178 16.327 10.8138C16.1003 10.8098 15.8809 10.894 15.715 11.0485L11.0192 15.7432L3.5152 12.4077C2.27503 11.8559 2.34853 10.072 3.62837 9.62286L23.38 2.71036Z" fill="#ED2C02" />
                       </svg>
                     </div>
                   </div>
