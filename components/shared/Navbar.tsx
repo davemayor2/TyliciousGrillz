@@ -149,7 +149,7 @@ export default function Navbar() {
         </Link>
 
         {/* Center Section (Navigation Links) - Instrument Sans & regular weight */}
-        <nav className="hidden md:flex items-center gap-8 lg:gap-12">
+        <nav className="hidden lg:flex items-center gap-8 lg:gap-12">
           {NAVIGATION_LINKS.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -169,7 +169,7 @@ export default function Navbar() {
         </nav>
 
         {/* Right Section (Actions) */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-6">
           {/* Scaled Shopping Cart Icon */}
           <button 
             onClick={() => setIsCartOpen(true)}
@@ -211,7 +211,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Action Controls */}
-        <div className="flex md:hidden items-center gap-4">
+        <div className="flex lg:hidden items-center gap-4">
           <button 
             onClick={() => setIsCartOpen(true)}
             className="relative p-2 text-white"
