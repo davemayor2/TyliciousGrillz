@@ -21,7 +21,7 @@ export default function HomeCategories() {
       icon: '🍖',
       title: 'Grilled Meats',
       image: '/images/rs=w_1536.webp',
-      description: 'Premium Lamb Chops, Sizzling Suya beef, and virgin Turkey grilled fresh daily for that authentic smoky taste.',
+      description: 'Premium Lamb Chops, Suya Chicken Wings beef, and virgin Turkey grilled fresh daily for that authentic smoky taste.',
     },
     {
       id: 'seafood',
