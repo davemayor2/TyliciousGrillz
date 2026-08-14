@@ -94,6 +94,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     image: '/images/rs=w_1536.webp',
     category: 'specials',
     popular: true,
+    video: '/vids/lamb_chops_ribs.mp4',
   },
   {
     id: 'grilled-chicken-skewers',
