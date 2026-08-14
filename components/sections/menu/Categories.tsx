@@ -18,9 +18,24 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
       image: '/images/rs=w_1160,h_1773.webp',
     },
     {
+      id: 'meats',
+      label: 'Grilled\nMeats',
+      image: '/images/rs=w_1536.webp',
+    },
+    {
+      id: 'chicken',
+      label: 'Chicken &\nSkewers',
+      image: '/images/Frame 153.png',
+    },
+    {
+      id: 'seafood',
+      label: 'Seafood',
+      image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
+    },
+    {
       id: 'specials',
       label: 'Grill\nSpecials',
-      image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
+      image: '/images/rs=w_1536.webp',
     },
   ];
 
@@ -44,8 +59,8 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
           </div>
         </div>
 
-        {/* 2-Column Category Pill Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto items-center">
+        {/* Responsive Category Pill Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 max-w-5xl mx-auto items-center">
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
