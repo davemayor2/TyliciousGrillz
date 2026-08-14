@@ -40,7 +40,7 @@ export default function Contact() {
               <p className="font-sans text-brand-brown/75 text-sm md:text-base mb-4">
                 Speak directly with our front desk to place your order.
               </p>
-              <span className="font-sans font-bold text-lg text-brand-orange">+234 812 345 6789</span>
+              <span className="font-sans font-bold text-lg text-brand-orange">+44 7597 934557</span>
             </Card>
           </AnimatedSection>
 
