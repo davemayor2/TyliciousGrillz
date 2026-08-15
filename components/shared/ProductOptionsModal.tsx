@@ -35,6 +35,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
   const handleAdd = () => {
     addToCart(product, quantity, spiceLevel, selectedSides, specialNotes);
+    alert(`${product.name} added to cart!`);
     onClose();
   };
 

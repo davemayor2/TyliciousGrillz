@@ -11,10 +11,6 @@ interface ProductsProps {
 }
 
 export default function Products({ products }: ProductsProps) {
-  const handleAddToCart = (name: string) => {
-    alert(`${name} added to cart!`);
-  };
-
   return (
     <section className="py-16 bg-brand-bg min-h-[45vh]">
       <Container>
@@ -35,7 +31,6 @@ export default function Products({ products }: ProductsProps) {
                   image={product.image}
                   category={product.category}
                   video={product.video}
-                  onAddToCart={() => handleAddToCart(product.name)}
                 />
               </AnimatedSection>
             ))}

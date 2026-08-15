@@ -9,10 +9,6 @@ import Button from '../../shared/Button';
 import AnimatedSection from '../../shared/AnimatedSection';
 
 export default function Favorites() {
-  const handleAddToCart = (name: string) => {
-    alert(`${name} added to cart!`);
-  };
-
   return (
     <section className="py-24 bg-[#FFF5F5] relative overflow-hidden">
       {/* Background soft glowing lights */}
@@ -48,7 +44,6 @@ export default function Favorites() {
                 image={product.image}
                 category={product.category}
                 video={product.video}
-                onAddToCart={() => handleAddToCart(product.name)}
               />
             </AnimatedSection>
           ))}

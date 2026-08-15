@@ -11,7 +11,6 @@ export default function ProductCard({
   image,
   category,
   video,
-  onAddToCart,
 }: ProductCardProps) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -77,9 +76,6 @@ export default function ProductCard({
 
   const handleButtonClick = () => {
     setIsOptionsOpen(true);
-    if (onAddToCart) {
-      onAddToCart();
-    }
   };
 
   return (
