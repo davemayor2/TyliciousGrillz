@@ -355,7 +355,7 @@ export default function CartDrawer() {
           )}
 
           {/* Empty Cart State CTA */}
-          {cart.length === 0 && (
+          {cart.length === 0 && checkoutStatus !== 'success' && checkoutStatus !== 'processing' && (
             <div className="cart-inner-item flex-1 flex flex-col items-center justify-center text-center py-12 shrink-0">
               <span className="text-5xl mb-4">🛒</span>
               <h3 className="font-judson font-bold text-xl text-[#1A0500] mb-2">Your Basket is Empty</h3>
