@@ -31,6 +31,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
     { id: 'plantain', label: 'Sweet Fried Plantain' },
     { id: 'mac-cheese', label: 'Mac & Cheese' },
     { id: 'vermicelli', label: 'Vermicelli Noodles' },
+    { id: 'fried-chips', label: 'Fried Chips' },
   ];
 
   const handleSideToggle = (sideId: string) => {

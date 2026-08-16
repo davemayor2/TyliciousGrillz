@@ -54,7 +54,7 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div className="w-full text-center">
             <h2 className="font-judson font-normal text-3xl md:text-[2.5rem] text-[#1A0500] leading-tight">
-              Featured Categories
+              Protein Choices
             </h2>
           </div>
         </div>
@@ -76,13 +76,13 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
                     isActive ? "bg-[#E63900]" : "bg-[#FFD1D1] group-hover:bg-[#FF8787]"
                   )}
                 />
-                
+
                 {/* Base Card Capsule wrapper */}
                 <div
                   className={cn(
                     "relative z-10 bg-white border rounded-[24px] p-2.5 pl-3.5 pr-5 flex items-center gap-3.5 transition-all duration-200 select-none",
-                    isActive 
-                      ? "border-[#E63900] translate-x-[0.5px] translate-y-[0.5px]" 
+                    isActive
+                      ? "border-[#E63900] translate-x-[0.5px] translate-y-[0.5px]"
                       : "border-brand-orange/5 group-hover:translate-x-[0.5px] group-hover:translate-y-[0.5px]"
                   )}
                 >

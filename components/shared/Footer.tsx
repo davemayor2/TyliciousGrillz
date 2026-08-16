@@ -12,18 +12,18 @@ export default function Footer() {
       <Container>
         {/* Main Footer Card - Dark Chocolate Brown with rounded corners */}
         <div className="bg-[#1A0500] rounded-[28px] p-10 md:p-12 text-white shadow-2xl border border-white/5 relative z-10">
-          
+
           {/* Top Main Grid (3-Column Layout) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 items-stretch">
-            
+
             {/* Left Column (Contact & Socials) */}
             <div className="flex flex-col items-start gap-4 md:pr-12 md:border-r border-white/15">
               <h3 className="font-sans font-bold text-lg md:text-xl text-white tracking-tight">
                 Contact
               </h3>
-              
+
               <div className="flex flex-col gap-2.5 font-sans text-sm text-white/80 leading-relaxed text-left">
-                <p>Phone: +123 456 7890</p>
+                <p>Phone: +44 7597 934557</p>
                 <p>Address: London & Kent, United Kingdom</p>
                 <p>Email: info@tyliciousgrillz.com</p>
               </div>
@@ -47,7 +47,7 @@ export default function Footer() {
               <h3 className="font-sans font-bold text-sm uppercase tracking-wider text-white mt-6">
                 Follow Us On
               </h3>
-              
+
               {/* Social Icons Row - Outlined White Icons */}
               <div className="flex items-center gap-4 mt-1">
                 {/* Instagram */}
@@ -66,7 +66,7 @@ export default function Footer() {
                   className="w-10 h-10 rounded-full border border-white/30 hover:border-white hover:bg-white/10 flex items-center justify-center text-white transition-all duration-200"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .74.1v-3.5a6.81 6.81 0 0 0-.74-.04c-3.76 0-6.82 3.06-6.82 6.82s3.06 6.82 6.82 6.82 6.82-3.06 6.82-6.82V8.82a8.31 8.31 0 0 0 4.9 1.55V6.92a4.83 4.83 0 0 1-1.62-.23z"/>
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .74.1v-3.5a6.81 6.81 0 0 0-.74-.04c-3.76 0-6.82 3.06-6.82 6.82s3.06 6.82 6.82 6.82 6.82-3.06 6.82-6.82V8.82a8.31 8.31 0 0 0 4.9 1.55V6.92a4.83 4.83 0 0 1-1.62-.23z" />
                   </svg>
                 </Link>
 
@@ -103,7 +103,7 @@ export default function Footer() {
               <h3 className="font-sans font-bold text-lg md:text-xl text-white tracking-tight">
                 Quick Links
               </h3>
-              
+
               {/* Links List - Vertical stack */}
               <div className="flex flex-col gap-2.5 mt-1 font-sans text-sm text-white/80 md:items-end w-full">
                 <Link href="/menu" className="hover:text-brand-orange transition-colors duration-200">
@@ -146,7 +146,7 @@ export default function Footer() {
             <h3 className="font-sans font-bold text-lg md:text-xl text-white tracking-tight">
               We Deliver To Your Area
             </h3>
-            
+
             {/* Area Tags Row */}
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-4 font-sans text-sm text-white/80">
               <span>London</span>

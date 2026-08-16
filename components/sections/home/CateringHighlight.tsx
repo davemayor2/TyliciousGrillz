@@ -29,14 +29,14 @@ export default function CateringHighlight() {
       id: 'group-platters',
       icon: '🍽️',
       title: 'Pre-Order Group Platters',
-      description: 'Perfect for group gatherings and family dinners, pre-order our massive custom platters delivered hot.',
+      description: 'Perfect for group gatherings, baby-showers and family dinners, pre-order our massive custom platters delivered hot.',
     },
   ];
 
   return (
     <section className="py-20 bg-[#FFF5F5] relative overflow-hidden border-t border-brand-orange/5">
       <Container className="max-w-[1200px]">
-        
+
         {/* Section Heading */}
         <AnimatedSection direction="up" className="flex flex-col items-center mb-12 text-center">
           <span className="font-sans font-semibold text-xs md:text-sm tracking-[0.2em] uppercase text-brand-orange mb-3">
@@ -61,19 +61,19 @@ export default function CateringHighlight() {
             >
               {/* Card Container - White Base with rounded-32px, no border, and solid offset pink shadow */}
               <div className="w-full bg-white rounded-[32px] p-8 flex flex-col justify-between items-start text-left shadow-[10px_10px_0px_#FFE4E6] hover:-translate-y-1.5 hover:-translate-x-1.5 hover:shadow-[14px_14px_0px_#FFE4E6] transition-all duration-300 select-none">
-                
+
                 {/* Top Content Stack */}
                 <div className="w-full">
                   {/* Emoji Visual Badge */}
                   <div className="w-12 h-12 rounded-2xl bg-[#FFF5F5] border border-[#FF8A8A]/30 flex items-center justify-center text-2xl mb-5">
                     {offering.icon}
                   </div>
-                  
+
                   {/* Title: Instrument Sans Bold */}
                   <h3 className="font-sans font-bold text-lg md:text-xl text-[#000000] mb-3 leading-snug tracking-tight">
                     {offering.title}
                   </h3>
-                  
+
                   {/* Description: Instrument Sans regular */}
                   <p className="font-sans font-normal text-[#555555] text-sm md:text-[14px] leading-relaxed mb-6">
                     {offering.description}
