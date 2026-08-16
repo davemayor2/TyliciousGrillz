@@ -161,12 +161,12 @@ export default function Hero() {
 
           {/* Main Heading using Instrument Sans globally */}
           <h1 className="animate-hero-item font-sans font-bold text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] text-white leading-[1.12] mb-6 tracking-tight">
-            Premium Grilled <span className="italic font-light">Seafood</span> & BBQ Delivered Fresh To Your <span className="italic font-light">Doorstep</span>
+            Premium  <span className="italic font-light"> Grills, </span> <br />Freshly Prepared <span className="whitespace-nowrap"></span> for  <span className="italic font-light">You</span>
           </h1>
 
           {/* Subheading / Paragraph */}
           <p className="animate-hero-item font-sans text-white/85 text-base md:text-[1.125rem] leading-[1.5] font-normal mt-6 mb-8 max-w-[620px]">
-            Enjoy expertly grilled fish, prawns, croaker fish, lamb chops, chicken wings and more. Freshly prepared and delivered hot across London, Kent, and surrounding areas.
+            From succulent lamb chops and ribs to grilled chicken, turkey, fish, prawns, suya and more freshly prepared and packed with bold, irresistible flavours. Available for collection, delivery and catering for every occasion.
           </p>
 
           {/* Call to Action Buttons */}
