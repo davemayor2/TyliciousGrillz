@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { MenuItem } from '@/types';
-import { X, Plus, Minus } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 interface ProductOptionsModalProps {
@@ -19,9 +19,8 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
   const sidesOptions = [
     { id: 'plantain', label: 'Sweet Fried Plantain' },
-    { id: 'chips', label: 'Golden Hand-cut Chips' },
-    { id: 'yam', label: 'Crispy Fried Yam' },
-    { id: 'jollof', label: 'Smoky Jollof Rice' },
+    { id: 'mac-cheese', label: 'Mac & Cheese' },
+    { id: 'vermicelli', label: 'Vermicelli Noodles' },
   ];
 
   const handleSideToggle = (sideId: string) => {
@@ -40,147 +39,157 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      {/* 3D Neo-Brutalist Offset Modal Wrapper */}
-      <div className="relative w-full max-w-[550px] group mx-auto my-auto z-10 flex flex-col">
-        {/* Background Offset Shadow Layer (Soft pink, fully rounded corners, matches first image reference) */}
-        <div className="absolute inset-0 bg-[#FFE6E0] rounded-[2rem] translate-x-2.5 translate-y-2.5 z-0" />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[8px] p-4 overflow-y-auto animate-backdrop">
+      <style>{`
+        @keyframes modalBackdrop {
+          from { opacity: 0; backdrop-filter: blur(0px); background-color: rgba(0, 0, 0, 0); }
+          to { opacity: 1; backdrop-filter: blur(8px); background-color: rgba(0, 0, 0, 0.4); }
+        }
+        @keyframes modalPop {
+          from { transform: scale(0.9) translateY(15px); opacity: 0; }
+          to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .animate-backdrop {
+          animation: modalBackdrop 0.22s ease-out forwards;
+        }
+        .animate-pop {
+          animation: modalPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+      `}</style>
+
+      {/* Modal Container: 3D Stacked Card with pastel pink shadow backdrop */}
+      <div className="relative w-full max-w-[520px] bg-white border border-[#E63900]/10 rounded-[32px] p-8 flex flex-col z-10 shadow-[12px_12px_0px_#FFD8D8] text-left animate-pop">
         
-        {/* Main Card Container */}
-        <div className="relative z-10 bg-white border border-[#E63900]/10 p-6 md:p-8 rounded-[2rem] flex flex-col shadow-[0_8px_30px_rgba(42,3,0,0.015)] max-h-[85vh] w-full text-left">
+        {/* Modal Header */}
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <h3 className="font-judson font-normal text-[28px] text-black leading-tight">
+            {product.name}
+          </h3>
           
-          {/* Close Button */}
+          {/* Close Button (Top-Right): circular with peach background tint and border */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 w-9 h-9 rounded-full bg-[#FFF5F5] hover:bg-[#FFD1D1] border border-[#FF8A8A] flex items-center justify-center text-[#1A0500] transition-colors cursor-pointer z-20"
+            className="w-9 h-9 rounded-full bg-[#FFF5F5] hover:bg-[#FFD1D1] border border-[#FF8A8A] flex items-center justify-center text-black transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
 
-          {/* Product Details Header */}
-          <div className="mb-6 pr-8">
-            <h3 className="font-judson font-bold text-2xl md:text-3xl text-[#1A0500] mb-2 leading-tight">
-              {product.name}
-            </h3>
-            <p className="font-sans text-sm text-[#555555] leading-relaxed">
-              {product.description}
-            </p>
+        {/* Description */}
+        <p className="font-sans text-[13.5px] leading-relaxed text-[#666666] mb-5">
+          {product.description || 'Fresh whole fish seasoned with Tylicious Grillz signature spices and flame-grilled to perfection. All fish meals are served with your choice of two delicious sides'}
+        </p>
+
+        {/* Form Options Scrollable Wrapper */}
+        <div className="flex-1 overflow-y-auto max-h-[40vh] pr-1 flex flex-col gap-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#E63900]/25 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#E63900]/35 transition-colors">
+          
+          {/* Section 1: Spice Level (Radio Group) */}
+          <div className="flex flex-col items-start w-full">
+            <span className="font-sans font-bold text-black text-base mb-2.5">
+              Spice Level*
+            </span>
+            <div className="flex flex-wrap gap-2.5 w-full">
+              {(['Mild', 'Medium', 'Hot', 'Extra Spicy'] as const).map((level) => {
+                const isSelected = spiceLevel === level;
+                return (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setSpiceLevel(level)}
+                    className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${
+                      isSelected
+                        ? 'bg-[#E63900] border-transparent text-white'
+                        : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
+                    }`}
+                  >
+                    {level}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Customization Options Container with Optimized Scrollbar spacing */}
-          <div className="flex-1 overflow-y-auto max-h-[45vh] pr-2.5 flex flex-col gap-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#E63900]/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#E63900]/35 transition-colors">
-            
-            {/* Option 1: Spice Level (Radio Selection) */}
-            <div className="flex flex-col items-start w-full">
-              <span className="font-sans font-bold text-black text-sm block mb-3">
-                Spice Level*
-              </span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
-                {(['Mild', 'Medium', 'Hot', 'Extra Spicy'] as const).map((level) => {
-                  const isSelected = spiceLevel === level;
-                  return (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setSpiceLevel(level)}
-                      className={`px-4 py-2.5 rounded-full border font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${
-                        isSelected
-                          ? 'bg-[#E63900] border-[#E63900] text-white shadow-[2px_2px_0px_#FFE6E0]'
-                          : 'bg-white border-[#FF8A8A] text-[#1A0500] hover:border-[#E63900]'
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  );
-                })}
-              </div>
+          {/* Section 2: Choose Your Sides (Checklist Group) */}
+          <div className="flex flex-col items-start w-full">
+            <span className="font-sans font-bold text-black text-base mb-2.5">
+              Choose Your Sides (Optional)
+            </span>
+            <div className="flex flex-wrap gap-2.5 w-full">
+              {sidesOptions.map((side) => {
+                const isChecked = selectedSides.includes(side.id);
+                return (
+                  <button
+                    key={side.id}
+                    type="button"
+                    onClick={() => handleSideToggle(side.id)}
+                    className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${
+                      isChecked
+                        ? 'bg-[#E63900] border-transparent text-white'
+                        : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
+                    }`}
+                  >
+                    {side.label}
+                  </button>
+                );
+              })}
             </div>
-
-            {/* Option 2: Side Selection (Checkboxes) */}
-            <div className="flex flex-col items-start w-full">
-              <span className="font-sans font-bold text-black text-sm block mb-3">
-                Choose Your Sides (Optional)
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                {sidesOptions.map((side) => {
-                  const isChecked = selectedSides.includes(side.id);
-                  return (
-                    <button
-                      key={side.id}
-                      type="button"
-                      onClick={() => handleSideToggle(side.id)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-full border font-sans text-sm text-left transition-all duration-150 cursor-pointer select-none ${
-                        isChecked
-                          ? 'bg-[#FFF5F5] border-[#E63900] font-semibold text-[#E63900] shadow-[2px_2px_0px_#FFE6E0]'
-                          : 'bg-white border-[#FF8A8A] text-[#555555] hover:border-[#E63900]'
-                      }`}
-                    >
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                        isChecked ? 'bg-[#E63900] border-[#E63900]' : 'border-[#FF8A8A] bg-white'
-                      }`}>
-                        {isChecked && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </div>
-                      <span>{side.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Option 3: Special Notes (Textarea) */}
-            <div className="flex flex-col items-start w-full">
-              <label htmlFor="modal-notes" className="font-sans font-bold text-black text-sm block mb-2 select-none">
-                Special Notes / Instructions
-              </label>
-              <textarea
-                id="modal-notes"
-                value={specialNotes}
-                onChange={(e) => setSpecialNotes(e.target.value)}
-                placeholder="E.g. No onions, extra chili dip, etc."
-                className="w-full h-24 px-4 py-3 bg-white border border-[#FF8A8A] rounded-[20px] shadow-[3px_3px_0px_#FFE6E0] text-black font-sans text-sm placeholder:text-[#B0B0B0] focus:outline-none focus:border-[#E63900] transition-colors resize-none"
-              />
-            </div>
-
           </div>
 
-          {/* Footer Actions Row */}
-          <div className="mt-8 pt-5 border-t border-[#E63900]/10 flex items-center justify-between gap-4">
-            
-            {/* Quantity Selector Counter */}
-            <div className="flex items-center gap-3.5 bg-[#FFF5F5] border border-[#FF8A8A] rounded-full px-4 py-1.5 shadow-[2px_2px_0px_#FFE6E0]">
-              <button
-                onClick={handleDecrement}
-                className="w-7 h-7 rounded-full bg-white flex items-center justify-center border border-[#FF8A8A] hover:bg-[#FFD1D1] text-[#E63900] cursor-pointer"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="font-sans font-bold text-lg text-[#1A0500] w-6 text-center select-none">
-                {quantity}
-              </span>
-              <button
-                onClick={handleIncrement}
-                className="w-7 h-7 rounded-full bg-white flex items-center justify-center border border-[#FF8A8A] hover:bg-[#FFD1D1] text-[#E63900] cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Add to Cart Premium Pill Button */}
-            <button
-              onClick={handleAdd}
-              className="flex-1 inline-flex items-center justify-center h-12 bg-[#E63900] text-white hover:bg-[#ff440a] rounded-full pl-6 pr-2 font-sans font-bold text-base transition-colors duration-200 group select-none cursor-pointer border border-transparent shadow-none"
-            >
-              <span>Add to Cart</span>
-              <div className="ml-3.5 w-8 h-8 bg-white rounded-full flex items-center justify-center text-[#E63900] shrink-0 overflow-hidden relative">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            </button>
-
+          {/* Section 3: Special Notes (Textarea) */}
+          <div className="flex flex-col items-start w-full">
+            <label htmlFor="modal-notes" className="font-sans font-bold text-black text-base mb-2.5 select-none">
+              Special Notes/Instructions
+            </label>
+            <textarea
+              id="modal-notes"
+              value={specialNotes}
+              onChange={(e) => setSpecialNotes(e.target.value)}
+              placeholder="No chips Please"
+              className="w-full h-24 px-4 py-3 bg-white border-[1.5px] border-[#E63900] rounded-[16px] text-black font-sans text-sm placeholder:text-[#666666] focus:outline-none focus:border-[#E63900] transition-colors resize-none"
+            />
           </div>
 
         </div>
+
+        {/* Footer Action Bar */}
+        <div className="flex items-center justify-between mt-6 gap-4 pt-4 border-t border-[#E63900]/10">
+          
+          {/* Quantity Counter (Left) */}
+          <div className="flex items-center gap-3 bg-white border-[1.5px] border-[#E63900] rounded-full py-1.5 px-3.5 select-none">
+            <button
+              onClick={handleDecrement}
+              className="w-6 h-6 rounded-full bg-[#FFF5F5] border border-[#E63900] flex items-center justify-center text-[#E63900] hover:bg-[#FFD1D1] transition-colors cursor-pointer select-none font-bold text-xs"
+            >
+              -
+            </button>
+            <span className="w-6 text-center text-black font-sans font-bold text-base select-none">
+              {quantity}
+            </span>
+            <button
+              onClick={handleIncrement}
+              className="w-6 h-6 rounded-full bg-[#FFF5F5] border border-[#E63900] flex items-center justify-center text-[#E63900] hover:bg-[#FFD1D1] transition-colors cursor-pointer select-none font-bold text-xs"
+            >
+              +
+            </button>
+          </div>
+
+          {/* Add to Cart Button (Right) */}
+          <button
+            onClick={handleAdd}
+            className="flex-1 flex items-center justify-between bg-[#E63900] hover:bg-[#ff440a] rounded-full py-2 pr-2 pl-6 transition-colors duration-200 cursor-pointer select-none"
+          >
+            <span className="text-white font-sans font-bold text-base">
+              Add to Cart
+            </span>
+            
+            {/* White Circular Badge with Right Arrow */}
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#E63900] shrink-0 font-bold text-lg">
+              →
+            </div>
+          </button>
+
+        </div>
+
       </div>
     </div>
   );

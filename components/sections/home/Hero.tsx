@@ -140,7 +140,7 @@ export default function Hero() {
       <div ref={bgRef} className="absolute inset-0 z-0">
         <Image
           src="/Landing Page.png"
-          alt="Premium Grilled Seafood Platter"
+          alt="Premium Grills, Freshly Prepared for You"
           fill
           priority
           sizes="100vw"
