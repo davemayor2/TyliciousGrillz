@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MenuItem } from '@/types';
 import { X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -16,6 +17,15 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
   const [spiceLevel, setSpiceLevel] = useState<'Mild' | 'Medium' | 'Hot' | 'Extra Spicy'>('Medium');
   const [selectedSides, setSelectedSides] = useState<string[]>([]);
   const [specialNotes, setSpecialNotes] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const sidesOptions = [
     { id: 'plantain', label: 'Sweet Fried Plantain' },
@@ -38,12 +48,14 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[8px] p-4 overflow-y-auto animate-backdrop">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 w-screen h-screen z-[9999] flex items-center justify-center p-4 overflow-y-auto animate-backdrop">
       <style>{`
         @keyframes modalBackdrop {
-          from { opacity: 0; backdrop-filter: blur(0px); background-color: rgba(0, 0, 0, 0); }
-          to { opacity: 1; backdrop-filter: blur(8px); background-color: rgba(0, 0, 0, 0.4); }
+          from { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); background-color: rgba(0, 0, 0, 0); }
+          to { opacity: 1; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background-color: rgba(0, 0, 0, 0.45); }
         }
         @keyframes modalPop {
           from { transform: scale(0.9) translateY(15px); opacity: 0; }
@@ -58,7 +70,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
       `}</style>
 
       {/* Modal Container: 3D Stacked Card with pastel pink shadow backdrop */}
-      <div className="relative w-full max-w-[520px] bg-white border border-[#E63900]/10 rounded-[32px] p-8 flex flex-col z-10 shadow-[12px_12px_0px_#FFD8D8] text-left animate-pop">
+      <div className="relative w-full max-w-[500px] max-h-[90vh] bg-white border border-[#E63900]/10 rounded-[28px] p-[28px_32px_28px_32px] flex flex-col z-10 shadow-[12px_12px_0px_#FFD8D8] text-left animate-pop overflow-visible">
         
         {/* Modal Header */}
         <div className="flex items-start justify-between gap-4 mb-2">
@@ -69,7 +81,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
           {/* Close Button (Top-Right): circular with peach background tint and border */}
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-[#FFF5F5] hover:bg-[#FFD1D1] border border-[#FF8A8A] flex items-center justify-center text-black transition-colors cursor-pointer shrink-0"
+            className="w-9 h-9 rounded-full bg-[#FFF5F5] hover:bg-[#FFE3E3] border-[1.5px] border-[#FF8A8A] flex items-center justify-center text-black transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -80,8 +92,8 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
           {product.description || 'Fresh whole fish seasoned with Tylicious Grillz signature spices and flame-grilled to perfection. All fish meals are served with your choice of two delicious sides'}
         </p>
 
-        {/* Form Options Scrollable Wrapper */}
-        <div className="flex-1 overflow-y-auto max-h-[40vh] pr-1 flex flex-col gap-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#E63900]/25 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#E63900]/35 transition-colors">
+        {/* Form Options Wrapper: scrolls internally on overflow but has scrollbar hidden */}
+        <div className="flex-1 overflow-y-auto max-h-[45vh] pr-1 flex flex-col gap-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           
           {/* Section 1: Spice Level (Radio Group) */}
           <div className="flex flex-col items-start w-full">
@@ -191,6 +203,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
