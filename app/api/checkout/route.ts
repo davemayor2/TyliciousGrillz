@@ -129,10 +129,11 @@ export async function POST(request: NextRequest) {
       url: session.url,
       sessionId: session.id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'An error occurred while creating the checkout session.';
     console.error('Stripe Checkout Session creation error:', error);
     return NextResponse.json(
-      { error: error?.message || 'An error occurred while creating the checkout session.' },
+      { error: message },
       { status: 500 }
     );
   }
