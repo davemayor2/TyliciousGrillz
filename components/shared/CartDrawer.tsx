@@ -243,8 +243,22 @@ export default function CartDrawer() {
             ) : checkoutStatus === 'processing' ? (
               <div className="cart-inner-item flex-1 flex flex-col items-center justify-center text-center py-12">
                 <div className="w-10 h-10 border-4 border-[#ED2C02] border-t-transparent rounded-full animate-spin mb-4" />
-                <h3 className="font-judson font-bold text-xl text-[#1A0500] mb-1">Processing Order...</h3>
-                <p className="font-sans text-sm text-gray-500">Please wait while we secure your transaction.</p>
+                <h3 className="font-judson font-bold text-xl text-[#1A0500] mb-1">Redirecting to Checkout...</h3>
+                <p className="font-sans text-sm text-gray-500">Connecting securely to Stripe.</p>
+              </div>
+            ) : checkoutStatus === 'error' ? (
+              <div className="cart-inner-item flex-1 flex flex-col items-center justify-center text-center py-8">
+                <span className="text-4xl mb-3">⚠️</span>
+                <h3 className="font-judson font-bold text-xl text-[#1A0500] mb-2">Checkout Error</h3>
+                <p className="font-sans text-sm text-red-600 max-w-xs mb-5">
+                  Unable to connect to Stripe checkout. Please try again.
+                </p>
+                <button
+                  onClick={resetCheckout}
+                  className="px-5 py-2 bg-[#ED2C02] text-white font-sans font-bold text-xs rounded-full border border-[#1A0500] shadow-[2px_2px_0px_#1A0500] cursor-pointer"
+                >
+                  Try Again
+                </button>
               </div>
             ) : (
               /* CART OVERVIEW & ITEMS ONLY */

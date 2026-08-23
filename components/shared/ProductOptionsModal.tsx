@@ -73,11 +73,11 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
       {showSuccess ? (
         /* Added to Basket Success Confirmation Popup Modal */
         <div className="relative w-full max-w-[460px] bg-white border border-[#E63900]/10 rounded-[28px] p-[36px_32px_32px_32px] flex flex-col items-center text-center z-10 shadow-[12px_12px_0px_#FFD8D8] animate-pop overflow-visible animate-backdrop-fade">
-          
+
           {/* Top Animation SVG Placeholder */}
           <div id="top-animation-placeholder" className="w-24 h-24 mb-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/add to cart.svg" alt="Success Animation" className="w-full h-full" />
+            <img src="/add to cart 2.gif" alt="Success Animation" className="w-full h-full" />
           </div>
 
           {/* Success Heading */}
@@ -129,13 +129,13 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
       ) : (
         /* Modal Container: 3D Stacked Card with pastel pink shadow backdrop */
         <div className="relative w-full max-w-[500px] max-h-[90vh] bg-white border border-[#E63900]/10 rounded-[28px] p-[28px_32px_28px_32px] flex flex-col z-10 shadow-[12px_12px_0px_#FFD8D8] text-left animate-pop overflow-visible">
-          
+
           {/* Modal Header */}
           <div className="flex items-start justify-between gap-4 mb-2">
             <h3 className="font-judson font-normal text-[28px] text-black leading-tight">
               {product.name}
             </h3>
-            
+
             {/* Close Button (Top-Right): circular with peach background tint and border */}
             <button
               onClick={onClose}
@@ -152,7 +152,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
           {/* Form Options Wrapper: scrolls internally on overflow but has scrollbar hidden */}
           <div className="flex-1 overflow-y-auto max-h-[45vh] pr-1 flex flex-col gap-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            
+
             {/* Section 1: Spice Level (Radio Group) */}
             <div className="flex flex-col items-start w-full">
               <span className="font-sans font-bold text-black text-base mb-2.5">
@@ -166,11 +166,10 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
                       key={level}
                       type="button"
                       onClick={() => setSpiceLevel(level)}
-                      className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${
-                        isSelected
-                          ? 'bg-[#E63900] border-transparent text-white'
-                          : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
-                      }`}
+                      className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${isSelected
+                        ? 'bg-[#E63900] border-transparent text-white'
+                        : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
+                        }`}
                     >
                       {level}
                     </button>
@@ -192,11 +191,10 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
                       key={side.id}
                       type="button"
                       onClick={() => handleSideToggle(side.id)}
-                      className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${
-                        isChecked
-                          ? 'bg-[#E63900] border-transparent text-white'
-                          : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
-                      }`}
+                      className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${isChecked
+                        ? 'bg-[#E63900] border-transparent text-white'
+                        : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
+                        }`}
                     >
                       {side.label}
                     </button>
@@ -223,7 +221,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
           {/* Footer Action Bar */}
           <div className="flex items-center justify-between mt-6 gap-4 pt-4 border-t border-[#E63900]/10">
-            
+
             {/* Quantity Counter (Left) */}
             <div className="flex items-center gap-3 bg-white border-[1.5px] border-[#E63900] rounded-full py-1.5 px-3.5 select-none">
               <button
@@ -251,7 +249,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
               <span className="text-white font-sans font-bold text-base">
                 Add to Cart
               </span>
-              
+
               {/* White Circular Badge with Right Arrow */}
               <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#E63900] shrink-0 font-bold text-lg">
                 →

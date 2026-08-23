@@ -60,7 +60,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save cart to localStorage
+  // Save cart to localStorage — accepts updater fn or array for flexibility
   const saveCart = (newCart: CartItem[]) => {
     setCart(newCart);
     localStorage.setItem('tylicious_cart', JSON.stringify(newCart));
@@ -73,29 +73,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     selectedSides: string[],
     specialNotes: string
   ) => {
-    // Generate a unique ID based on the product and options selection
+    // Unique key: product + spice level + sides only.
+    // specialNotes is intentionally excluded so re-orders with a slightly
+    // different note still merge into the existing cart row rather than
+    // creating a duplicate. Sides order is normalised via sort().
     const sidesKey = [...selectedSides].sort().join(',');
-    const uniqueId = `${product.id}-${spiceLevel}-${sidesKey}-${specialNotes.trim()}`;
+    const uniqueId = `${product.id}-${spiceLevel}-${sidesKey}`;
 
-    const existingIndex = cart.findIndex((item) => item.uniqueId === uniqueId);
-    if (existingIndex > -1) {
-      const updatedCart = [...cart];
-      updatedCart[existingIndex].quantity += quantity;
-      saveCart(updatedCart);
-    } else {
-      saveCart([
-        ...cart,
-        {
-          id: product.id,
-          uniqueId,
-          product,
-          quantity,
-          spiceLevel,
-          selectedSides,
-          specialNotes,
-        },
-      ]);
-    }
+    // Use functional setState to always read the *latest* cart, preventing
+    // stale-closure duplicates when the modal is closed and re-opened.
+    setCart((prevCart) => {
+      const existingIndex = prevCart.findIndex((item) => item.uniqueId === uniqueId);
+      let updatedCart: CartItem[];
+      if (existingIndex > -1) {
+        updatedCart = prevCart.map((item, idx) =>
+          idx === existingIndex ? { ...item, quantity: item.quantity + quantity } : item
+        );
+      } else {
+        updatedCart = [
+          ...prevCart,
+          {
+            id: product.id,
+            uniqueId,
+            product,
+            quantity,
+            spiceLevel,
+            selectedSides,
+            specialNotes,
+          },
+        ];
+      }
+      localStorage.setItem('tylicious_cart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
     setIsCartOpen(true);
   };
 
@@ -131,17 +141,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const triggerCheckout = async (paymentMethod: 'card' | 'apple-pay' | 'google-pay') => {
+    if (cart.length === 0) return;
     setCheckoutStatus('processing');
-    console.log('Processing payment via:', paymentMethod);
-    
-    // Simulate API stripe checkout / paystack gateway processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    // 95% success rate simulation
-    if (Math.random() < 0.98) {
-      setCheckoutStatus('success');
-      clearCart();
-    } else {
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: cart,
+          fulfillment,
+          postcode,
+          scheduledDate,
+          scheduledTime,
+          paymentMethod,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || 'Failed to initiate checkout.');
+      }
+
+      // Redirect customer to Stripe Checkout page
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Checkout error:', error);
       setCheckoutStatus('error');
     }
   };
