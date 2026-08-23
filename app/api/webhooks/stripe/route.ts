@@ -22,25 +22,27 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (!webhookSecret) {
+    console.error('❌ STRIPE_WEBHOOK_SECRET is missing from environment variables.');
+    return NextResponse.json(
+      { error: 'Webhook signing secret is not configured on the server.' },
+      { status: 500 }
+    );
+  }
+
   let event: Stripe.Event;
 
   try {
+    // Read raw body as text for cryptographic signature verification
     const rawBody = await request.text();
 
-    if (webhookSecret) {
-      // Cryptographically verify the event was genuinely sent by Stripe
-      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-    } else {
-      console.warn(
-        '⚠️ STRIPE_WEBHOOK_SECRET is not configured in .env.local. Signature verification was bypassed for local testing.'
-      );
-      event = JSON.parse(rawBody) as Stripe.Event;
-    }
+    // Verify webhook signature with Stripe SDK
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown signature error';
+    const message = err instanceof Error ? err.message : 'Signature verification failed';
     console.error('⚠️ Stripe Webhook signature verification failed:', message);
     return NextResponse.json(
-      { error: `Webhook Error: ${message}` },
+      { error: `Webhook Signature Error: ${message}` },
       { status: 400 }
     );
   }
