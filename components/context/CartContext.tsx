@@ -122,49 +122,41 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const savedCart = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('tylicious_cart');
       if (savedCart) {
         const parsed = JSON.parse(savedCart);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           // Normalize items to ensure full schema compliance
-          const normalized = parsed.map((item) => {
-            const unitPrice = Number(item.unit_price ?? item.product?.price ?? 0);
-            const qty = Math.max(1, Number(item.quantity) || 1);
-            const options: CartItemOptions = item.options || {
-              'Spice Level': [{ name: item.spiceLevel || 'Medium', price: 0 }],
-              'Sides': (item.selectedSides || []).map((s: string) => ({ name: s, price: 0 })),
-            };
-            const optionModifierSum = Object.values(options).reduce((s, arr) => {
-              return s + arr.reduce((vS, val) => vS + Number(val.price || 0), 0);
-            }, 0);
-            const itemTotal = Number(item.total ?? (qty * (unitPrice + optionModifierSum)).toFixed(2));
-            const cart_item_id = item.cart_item_id || item.uniqueId || `${item.product_id || item.id}-${JSON.stringify(options)}`;
+          const normalized = parsed
+            .filter((item) => item && typeof item === 'object')
+            .map((item) => {
+              const unitPrice = Number(item.unit_price ?? item.product?.price ?? 0);
+              const qty = Math.max(1, Number(item.quantity) || 1);
+              const options: CartItemOptions = item.options || {
+                'Spice Level': [{ name: item.spiceLevel || 'Medium', price: 0 }],
+                'Sides': (item.selectedSides || []).map((s: string) => ({ name: s, price: 0 })),
+              };
+              const optionModifierSum = Object.values(options).reduce((s, arr) => {
+                return s + (Array.isArray(arr) ? arr.reduce((vS, val) => vS + Number(val?.price || 0), 0) : 0);
+              }, 0);
+              const itemTotal = Number(item.total ?? (qty * (unitPrice + optionModifierSum)).toFixed(2));
+              const cart_item_id = item.cart_item_id || item.uniqueId || `${item.product_id || item.id}-${JSON.stringify(options)}`;
 
-            return {
-              cart_item_id,
-              product_id: item.product_id || item.id || item.product?.id,
-              product_name: item.product_name || item.product?.name || 'Item',
-              product_image: item.product_image || item.product?.image,
-              quantity: qty,
-              unit_price: unitPrice,
-              total: itemTotal,
-              options,
-              product: item.product,
-              specialNotes: item.specialNotes,
-            } as CartItem;
-          });
+              return {
+                cart_item_id,
+                product_id: item.product_id || item.id || item.product?.id,
+                product_name: item.product_name || item.product?.name || 'Item',
+                product_image: item.product_image || item.product?.image,
+                quantity: qty,
+                unit_price: unitPrice,
+                total: itemTotal,
+                options,
+                product: item.product,
+                specialNotes: item.specialNotes,
+              } as CartItem;
+            });
           setItems(normalized);
         }
       }
     } catch (e) {
       console.error('Failed to load cart from storage:', e);
-    }
-  }, []);
-
-  // Save cart helper
-  const persistItems = useCallback((newItems: CartItem[]) => {
-    setItems(newItems);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newItems));
-    } catch (err) {
-      console.error('Failed to persist cart:', err);
     }
   }, []);
 
@@ -297,8 +289,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Clear Cart
   const clearCart = useCallback(() => {
-    persistItems([]);
-  }, [persistItems]);
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.removeItem('tylicious_cart');
+    } catch (e) {
+      console.error('Failed to clear cart storage:', e);
+    }
+    setItems([]);
+  }, []);
 
   const openCart = useCallback(() => setIsCartOpen(true), []);
   const closeCart = useCallback(() => {

@@ -13,10 +13,16 @@ function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const { clearCart } = useCart();
+  const hasClearedRef = React.useRef(false);
 
   useEffect(() => {
-    // Clear cart once payment is confirmed upon landing
-    clearCart();
+    // Unlock body scroll in case any open modals were unmounted
+    document.body.style.overflow = '';
+
+    if (!hasClearedRef.current) {
+      hasClearedRef.current = true;
+      clearCart();
+    }
   }, [clearCart]);
 
   return (

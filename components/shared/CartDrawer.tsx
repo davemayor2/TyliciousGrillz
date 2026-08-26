@@ -27,19 +27,34 @@ export default function CartDrawer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const mainCardRef = useRef<HTMLDivElement>(null);
+  const hasOpenedRef = useRef(false);
 
   useEffect(() => {
     if (!backdropRef.current || !containerRef.current || !headerRef.current || !mainCardRef.current) return;
 
-    // Select all inner elements to animate staggered
-    const innerContents = mainCardRef.current.querySelectorAll('.cart-inner-item');
     const closeBtn = headerRef.current.querySelector('.cart-close-btn');
+    const innerContents = mainCardRef.current.querySelectorAll('.cart-inner-item');
+    const allTargets = [
+      backdropRef.current,
+      containerRef.current,
+      headerRef.current,
+      mainCardRef.current,
+      closeBtn,
+      ...Array.from(innerContents),
+    ].filter(Boolean);
+
+    // Initial mount when drawer has never been opened
+    if (!isCartOpen && !hasOpenedRef.current) {
+      gsap.set(backdropRef.current, { opacity: 0, pointerEvents: 'none' });
+      gsap.set(containerRef.current, { pointerEvents: 'none' });
+      gsap.set(mainCardRef.current, { x: '100%', opacity: 0 });
+      return;
+    }
 
     if (isCartOpen) {
-      // Open sequence: Kill active tweens and start animation timeline
-      gsap.killTweensOf([backdropRef.current, containerRef.current, headerRef.current, mainCardRef.current, innerContents, closeBtn]);
+      hasOpenedRef.current = true;
+      gsap.killTweensOf(allTargets);
       
-      // Ensure elements are interactive
       gsap.set(backdropRef.current, { pointerEvents: 'auto' });
       gsap.set(containerRef.current, { pointerEvents: 'auto' });
 
@@ -120,9 +135,12 @@ export default function CartDrawer() {
         );
       }
 
+      return () => {
+        tl.kill();
+      };
     } else {
       // Exit Animation
-      gsap.killTweensOf([backdropRef.current, containerRef.current, headerRef.current, mainCardRef.current, closeBtn]);
+      gsap.killTweensOf(allTargets);
 
       gsap.set(backdropRef.current, { pointerEvents: 'none' });
       gsap.set(containerRef.current, { pointerEvents: 'none' });
@@ -159,6 +177,10 @@ export default function CartDrawer() {
         duration: 0.3,
         ease: 'power2.inOut',
       }, 0.1);
+
+      return () => {
+        tl.kill();
+      };
     }
   }, [isCartOpen]);
 

@@ -80,7 +80,7 @@ export default function Navbar() {
   }, [isOpen]);
 
   const { cart, setIsCartOpen } = useCart();
-  const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalQty = Array.isArray(cart) ? cart.reduce((sum, item) => sum + (Number(item?.quantity) || 0), 0) : 0;
 
   const handleMouseEnter = () => {
     if (!arrowRef.current) return;
