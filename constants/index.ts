@@ -106,7 +106,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
   },
   {
     id: 'grilled-turkey',
-    name: 'Grilled Turkey',
+    name: 'Grilled Virgin Turkey',
     description: 'Sizzling tender turkey char-grilled with our house spices, served with Fried Plantain & Chips.',
     price: 20,
     image: '/vids/turkey_thumbnail.jpg',
