@@ -41,93 +41,86 @@ export const WHY_LOVE_US_DATA: WhyLoveUsCard[] = [
   },
 ];
 
-export const FAVORITES_DATA: MenuItem[] = [
+export const FULL_MENU_DATA: MenuItem[] = [
+  // 1. Grilled Fish
   {
     id: 'grilled-fish',
-    name: 'Grilled Catfish',
-    description: 'Premium whole Catfish grilled to perfection with Tylicious signature blend of spices, served with golden fries or spicy plantains.',
+    name: 'Grilled Fish',
+    description: 'Whole fresh fish (Catfish, Tilapia, or Croaker) flame-grilled over hot charcoal with signature spices, served with your choice of sides.',
     price: 50,
-    image: '/images/rs=w_1160,h_1218.webp',
-    category: 'fish',
+    image: '/images/rs=w_1160,h_1773.webp',
+    category: 'grilled-fish',
     popular: true,
     video: '/vids/catfish.mp4',
   },
-  {
-    id: 'grilled-tilapia',
-    name: 'Grilled Tilapia Fish',
-    description: 'Premium fresh Tilapia, slow grilled over open charcoal, infused with garlic, ginger, and local herbs.',
-    price: 55,
-    image: '/images/rs=w_1160,h_1257.webp',
-    category: 'fish',
-    popular: true,
-    video: '/vids/grilled_tilapia.mp4',
-  },
-  {
-    id: 'grilled-croaker',
-    name: 'Grilled Croaker Fish',
-    description: 'Fleshy croaker fish marinated in chili peppers, lemon, and aromatic spices, grilled on live coals for that smoky finish.',
-    price: 65,
-    image: '/images/rs=w_1160,h_1532.webp',
-    category: 'fish',
-    popular: true,
-    video: '/vids/grilled_croaker.mp4',
-  },
-];
 
-export const FULL_MENU_DATA: MenuItem[] = [
-  ...FAVORITES_DATA,
+  // 2. Chicken & Turkey
   {
-    id: 'bbq-pork-ribs',
-    name: 'Grilled Lamb Chops',
-    description: 'Tender baby back ribs slow-cooked for 6 hours, glazed with our rich sticky house honey-BBQ sauce.',
-    price: 85,
-    image: '/images/rs=w_1536.webp',
-    category: 'meats',
-    popular: true,
-    video: '/vids/lamb_chops_ribs.mp4',
-  },
-  {
-    id: 'sizzling-suya',
-    name: 'Sizzling Suya',
-    description: 'Succulent beef strips seasoned with authentic Nigerian Suya spice, grilled over red-hot charcoal.',
-    price: 45,
+    id: 'chicken-bbq',
+    name: 'Chicken BBQ',
+    description: 'Succulent chicken BBQ including juicy flame-grilled chicken legs, glazed in rich sticky house barbecue marinade.',
+    price: 40,
     image: '/images/Frame 153.png',
-    category: 'meats',
+    category: 'chicken-turkey',
     popular: true,
-    spicy: true,
-    video: '/vids/suya_vid.mp4',
+    video: '/vids/chicken_wings.mp4',
   },
   {
-    id: 'grilled-virgin-turkey',
-    name: 'Grilled Virgin Turkey',
-    description: 'Sizzling tender turkey wings char-grilled with our house spices.',
-    price: 50,
-    image: '/vids/turkey_thumbnail.jpg',
-    category: 'meats',
-    video: '/vids/turkey_vid.mp4',
-  },
-  {
-    id: 'grilled-chicken-skewers',
-    name: 'Spicy Chicken Skewers',
-    description: 'Juicy chunks of chicken breast marinated in Suya spice, grilled with fresh bell peppers and onions.',
+    id: 'chicken-thigh',
+    name: 'Chicken Thigh',
+    description: 'Tender, juicy chicken thighs marinated in aromatic African herbs and flame-grilled for a rich, smoky taste.',
     price: 35,
     image: '/images/Frame 153.png',
-    category: 'chicken',
+    category: 'chicken-turkey',
+    video: '/vids/chicken_wings.mp4',
+  },
+  {
+    id: 'wings-stop',
+    name: 'Wings- stop',
+    description: 'Crispy and savory flame-grilled chicken wings seasoned to perfection with Tylicious special pepper blend.',
+    price: 30,
+    image: '/images/Frame 153.png',
+    category: 'chicken-turkey',
     spicy: true,
     video: '/vids/chicken_wings.mp4',
   },
   {
-    id: 'bbq-chicken',
-    name: 'BBQ Chicken',
-    description: 'Quarter chicken grilled over charcoal and glazed in our rich, sticky house honey-BBQ marinade.',
-    price: 40,
-    image: '/images/Frame 153.png',
-    category: 'chicken',
-    video: '/vids/grilled_turkey.mp4',
+    id: 'grilled-turkey',
+    name: 'Grilled Turkey',
+    description: 'Sizzling tender turkey wings char-grilled with our house spices for an authentic, unforgettable smoky flavor.',
+    price: 50,
+    image: '/vids/turkey_thumbnail.jpg',
+    category: 'chicken-turkey',
+    video: '/vids/turkey_vid.mp4',
+  },
+
+  // 3. Lamb & Beef
+  {
+    id: 'lamb-chops-ribs',
+    name: 'Lamb Chops & Ribs',
+    description: 'Tender lamb chops and baby back ribs slow-cooked for hours and glazed with our rich sticky house honey-BBQ sauce.',
+    price: 85,
+    image: '/images/rs=w_1536.webp',
+    category: 'lamb-beef',
+    popular: true,
+    video: '/vids/lamb_chops_ribs.mp4',
   },
   {
-    id: 'garlic-jumbo-prawns',
-    name: 'Garlic Jumbo Prawns',
+    id: 'suya',
+    name: 'Suya',
+    description: 'Succulent beef strips seasoned with authentic Nigerian Suya pepper blend, grilled over red-hot charcoal.',
+    price: 45,
+    image: '/images/Frame 153.png',
+    category: 'lamb-beef',
+    popular: true,
+    spicy: true,
+    video: '/vids/suya_vid.mp4',
+  },
+
+  // 4. Seafood
+  {
+    id: 'jumbo-prawn',
+    name: 'Jumbo Prawn',
     description: 'King jumbo prawns skewered and grilled over charcoal, brushed with rich garlic chili butter.',
     price: 60,
     image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
@@ -135,25 +128,21 @@ export const FULL_MENU_DATA: MenuItem[] = [
     video: '/vids/Tylicious Seafood Platter.mp4',
   },
   {
-    id: 'seafood-platter',
-    name: 'Tylicious Seafood Platter',
-    description: 'A grand feast of grilled jumbo prawns, calamari, lobster tails, and croaker fish, served with spicy dip and corn.',
-    price: 150,
+    id: 'grilled-seafood-prawn',
+    name: 'Grilled Seafood Prawn',
+    description: 'A grand feast of flame-grilled prawns and seafood delicacies seasoned with aromatic herbs and spicy garlic dip.',
+    price: 75,
     image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
     category: 'seafood',
     popular: true,
     video: '/vids/Tylicious Seafood Platter.mp4',
   },
-  {
-    id: 'mixed-grill',
-    name: 'Tylicious Mixed Grill',
-    description: 'A master platter combining grilled lamb chops, chicken skewers, beef suya, and virgin turkey.',
-    price: 95,
-    image: '/images/rs=w_1536.webp',
-    category: 'specials',
-    popular: true,
-    video: '/vids/lamb_chops_ribs.mp4',
-  },
+];
+
+export const FAVORITES_DATA: MenuItem[] = [
+  FULL_MENU_DATA[0], // Grilled Fish
+  FULL_MENU_DATA[1], // Chicken BBQ
+  FULL_MENU_DATA[5], // Lamb Chops & Ribs
 ];
 
 export const TESTIMONIALS_DATA: Testimonial[] = [

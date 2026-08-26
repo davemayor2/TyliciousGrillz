@@ -10,32 +10,32 @@ import AnimatedSection from '../../shared/AnimatedSection';
 export default function HomeCategories() {
   const categories = [
     {
-      id: 'fish',
+      id: 'grilled-fish',
       icon: '🐟',
       title: 'Grilled Fish',
       image: '/images/rs=w_1160,h_1773.webp',
       description: 'Catfish, Tilapia, and Croaker slow-cooked over red-hot charcoal, seasoned with premium African spices.',
     },
     {
-      id: 'meats',
+      id: 'chicken-turkey',
+      icon: '🍗',
+      title: 'Chicken & Turkey',
+      image: '/images/Frame 153.png',
+      description: 'Succulent Chicken BBQ legs, thighs, spicy wings, and tender virgin turkey grilled fresh daily.',
+    },
+    {
+      id: 'lamb-beef',
       icon: '🍖',
-      title: 'Grilled Meats',
+      title: 'Lamb & Beef',
       image: '/images/rs=w_1536.webp',
-      description: 'Premium Lamb Chops, Suya Chicken Wings beef, and virgin Turkey grilled fresh daily for that authentic smoky taste.',
+      description: 'Premium Lamb Chops, glazed baby back ribs, and authentic spicy Nigerian beef Suya.',
     },
     {
       id: 'seafood',
       icon: '🦐',
       title: 'Seafood',
       image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
-      description: 'Garlic Jumbo Prawns and massive seafood platters combining lobster tails, calamari and spicy butter dips.',
-    },
-    {
-      id: 'specials',
-      icon: '🔥',
-      title: 'Grill Specials',
-      image: '/images/rs=w_1536.webp',
-      description: 'Explore our Mixed Grill platters and chef-selected signature barbecue combos designed to satisfy.',
+      description: 'Garlic Jumbo Prawns and flame-grilled seafood platters seasoned with aromatic herbs and spicy butter.',
     },
   ];
 

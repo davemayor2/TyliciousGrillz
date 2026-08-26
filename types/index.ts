@@ -81,7 +81,7 @@ export interface MenuItem {
   description: string;
   price: number;
   image: string;
-  category: 'fish' | 'meats' | 'chicken' | 'seafood' | 'specials';
+  category: 'grilled-fish' | 'chicken-turkey' | 'lamb-beef' | 'seafood' | 'fish' | 'meats' | 'chicken' | 'specials' | string;
   popular?: boolean;
   spicy?: boolean;
   video?: string;

@@ -13,29 +13,24 @@ interface CategoriesProps {
 export default function Categories({ activeCategory, onSelectCategory }: CategoriesProps) {
   const categories = [
     {
-      id: 'fish',
+      id: 'grilled-fish',
       label: 'Grilled\nFish',
       image: '/images/rs=w_1160,h_1773.webp',
     },
     {
-      id: 'meats',
-      label: 'Grilled\nMeats',
-      image: '/images/rs=w_1536.webp',
+      id: 'chicken-turkey',
+      label: 'Chicken &\nTurkey',
+      image: '/images/Frame 153.png',
     },
     {
-      id: 'chicken',
-      label: 'Chicken &\nSkewers',
-      image: '/images/Frame 153.png',
+      id: 'lamb-beef',
+      label: 'Lamb &\nBeef',
+      image: '/images/rs=w_1536.webp',
     },
     {
       id: 'seafood',
       label: 'Seafood',
       image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
-    },
-    {
-      id: 'specials',
-      label: 'Grill\nSpecials',
-      image: '/images/rs=w_1536.webp',
     },
   ];
 
@@ -59,8 +54,8 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
           </div>
         </div>
 
-        {/* Responsive Category Pill Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 max-w-5xl mx-auto items-center">
+        {/* Responsive Category Pill Cards Grid (4 columns) */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto items-center">
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
