@@ -137,7 +137,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
   },
   {
     id: 'suya',
-    name: 'Suya',
+    name: 'Sizzling Suya',
     description: 'Suya with fresh Tomatoes & Onions, seasoned with authentic Suya pepper, served with Fried Plantain & Chips.',
     price: 15,
     image: '/images/Frame 153.png',
