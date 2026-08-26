@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { MenuItem, Product, ProductOption, OptionValue } from '@/types';
 import { X, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { supabase } from '@/libs/supabase';
+import { supabase } from '@/libs/supabase/client';
 
 interface ProductOptionsModalProps {
   product: MenuItem;

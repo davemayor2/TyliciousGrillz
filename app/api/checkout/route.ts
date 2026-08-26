@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { FULL_MENU_DATA } from '@/constants';
-import { supabaseAdmin } from '@/libs/supabase';
+import { supabaseAdmin } from '@/libs/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {

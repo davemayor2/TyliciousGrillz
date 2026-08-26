@@ -1,6 +1,6 @@
 import React from 'react';
 import { Resend } from 'resend';
-import { supabaseAdmin } from '@/libs/supabase';
+import { supabaseAdmin } from '@/libs/supabase/server';
 import { OrderReceipt, OrderData, OrderItemData } from '@/emails/OrderReceipt';
 import { NewOrderAlert } from '@/emails/NewOrderAlert';
 
