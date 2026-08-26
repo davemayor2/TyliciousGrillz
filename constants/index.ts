@@ -44,14 +44,34 @@ export const WHY_LOVE_US_DATA: WhyLoveUsCard[] = [
 export const FULL_MENU_DATA: MenuItem[] = [
   // 1. Grilled Fish
   {
-    id: 'grilled-fish',
-    name: 'Grilled Fish',
-    description: 'Whole fresh fish (Catfish, Tilapia, or Croaker) flame-grilled over hot charcoal with signature spices, served with your choice of sides.',
+    id: 'grilled-catfish',
+    name: 'Grilled Catfish',
+    description: 'Premium whole Catfish grilled to perfection with Tylicious signature blend of spices, served with golden fries or spicy plantains.',
     price: 50,
-    image: '/images/rs=w_1160,h_1773.webp',
+    image: '/images/rs=w_1160,h_1218.webp',
     category: 'grilled-fish',
     popular: true,
     video: '/vids/catfish.mp4',
+  },
+  {
+    id: 'grilled-tilapia',
+    name: 'Grilled Tilapia Fish',
+    description: 'Premium fresh Tilapia, slow grilled over open charcoal, infused with garlic, ginger, and local herbs.',
+    price: 55,
+    image: '/images/rs=w_1160,h_1257.webp',
+    category: 'grilled-fish',
+    popular: true,
+    video: '/vids/grilled_tilapia.mp4',
+  },
+  {
+    id: 'grilled-croaker',
+    name: 'Grilled Croaker Fish',
+    description: 'Fleshy croaker fish marinated in chili peppers, lemon, and aromatic spices, grilled on live coals for that smoky finish.',
+    price: 65,
+    image: '/images/rs=w_1160,h_1532.webp',
+    category: 'grilled-fish',
+    popular: true,
+    video: '/vids/grilled_croaker.mp4',
   },
 
   // 2. Chicken & Turkey
@@ -140,9 +160,9 @@ export const FULL_MENU_DATA: MenuItem[] = [
 ];
 
 export const FAVORITES_DATA: MenuItem[] = [
-  FULL_MENU_DATA[0], // Grilled Fish
-  FULL_MENU_DATA[1], // Chicken BBQ
-  FULL_MENU_DATA[5], // Lamb Chops & Ribs
+  FULL_MENU_DATA[0], // Grilled Catfish
+  FULL_MENU_DATA[1], // Grilled Tilapia Fish
+  FULL_MENU_DATA[2], // Grilled Croaker Fish
 ];
 
 export const TESTIMONIALS_DATA: Testimonial[] = [

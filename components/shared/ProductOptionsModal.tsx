@@ -16,8 +16,6 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
   const [quantity, setQuantity] = useState(1);
   const [spiceLevel, setSpiceLevel] = useState<'Mild' | 'Medium' | 'Hot' | 'Extra Spicy'>('Medium');
   const [selectedSides, setSelectedSides] = useState<string[]>([]);
-  const isFish = product.category === 'grilled-fish' || product.id === 'grilled-fish' || product.name.toLowerCase().includes('fish');
-  const [fishType, setFishType] = useState<'Croaker' | 'Tilapia' | 'Catfish'>('Croaker');
   const [specialNotes, setSpecialNotes] = useState('');
   const [mounted, setMounted] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -47,10 +45,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
   const handleDecrement = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const handleAdd = () => {
-    const combinedNotes = isFish
-      ? `Fish: ${fishType}${specialNotes ? ` | ${specialNotes}` : ''}`
-      : specialNotes;
-    addToCart(product, quantity, spiceLevel, selectedSides, combinedNotes);
+    addToCart(product, quantity, spiceLevel, selectedSides, specialNotes);
     setShowSuccess(true);
   };
 
@@ -157,34 +152,6 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
           {/* Form Options Wrapper: scrolls internally on overflow but has scrollbar hidden */}
           <div className="flex-1 overflow-y-auto max-h-[45vh] pr-1 flex flex-col gap-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-
-            {/* Fish Choice (Radio Group for Grilled Fish) */}
-            {isFish && (
-              <div className="flex flex-col items-start w-full">
-                <span className="font-sans font-bold text-black text-base mb-2.5">
-                  Select Fish Choice*
-                </span>
-                <div className="flex flex-wrap gap-2.5 w-full">
-                  {(['Croaker', 'Tilapia', 'Catfish'] as const).map((type) => {
-                    const isSelected = fishType === type;
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setFishType(type)}
-                        className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${
-                          isSelected
-                            ? 'bg-[#E63900] border-transparent text-white'
-                            : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
-                        }`}
-                      >
-                        🐟 {type}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
             {/* Section 1: Spice Level (Radio Group) */}
             <div className="flex flex-col items-start w-full">
