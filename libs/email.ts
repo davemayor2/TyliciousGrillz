@@ -11,11 +11,11 @@ export const resend = new Resend(apiKey || 're_placeholder');
 
 const DEFAULT_FROM =
   process.env.RESEND_FROM_EMAIL ||
-  'Tylicious Grillz <onboarding@resend.dev>';
+  'Tylicious Grillz <order@tyliciousgrillz.com>';
 
 const RESTAURANT_OPERATIONAL_EMAIL =
   process.env.RESTAURANT_NOTIFICATION_EMAIL ||
-  'orders@tyliciousgrillz.co.uk';
+  'order@tyliciousgrillz.com';
 
 /**
  * Sends order confirmation receipt to customer and new order alert to restaurant staff

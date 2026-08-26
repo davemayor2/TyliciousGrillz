@@ -22,8 +22,19 @@ function OrderSuccessContent() {
     if (!hasClearedRef.current) {
       hasClearedRef.current = true;
       clearCart();
+
+      // Trigger fail-safe order confirmation and email dispatch
+      if (sessionId) {
+        fetch('/api/order/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        }).catch((err) => {
+          console.warn('Order confirmation check:', err);
+        });
+      }
     }
-  }, [clearCart]);
+  }, [clearCart, sessionId]);
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col justify-between">
