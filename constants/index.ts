@@ -46,8 +46,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'grilled-catfish',
     name: 'Grilled Catfish',
-    description: 'Premium whole Catfish grilled to perfection with Tylicious signature blend of spices, served with golden fries or spicy plantains.',
-    price: 50,
+    description: 'Grilled Catfish seasoned with Tylicious signature spices, served with Fried Plantain & Chips.',
+    price: 25,
     image: '/images/rs=w_1160,h_1218.webp',
     category: 'grilled-fish',
     popular: true,
@@ -56,8 +56,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'grilled-tilapia',
     name: 'Grilled Tilapia Fish',
-    description: 'Premium fresh Tilapia, slow grilled over open charcoal, infused with garlic, ginger, and local herbs.',
-    price: 55,
+    description: 'Grilled Tilapia infused with garlic, ginger, and local herbs, served with Fried Plantain & Chips.',
+    price: 25,
     image: '/images/rs=w_1160,h_1257.webp',
     category: 'grilled-fish',
     popular: true,
@@ -66,8 +66,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'grilled-croaker',
     name: 'Grilled Croaker Fish',
-    description: 'Fleshy croaker fish marinated in chili peppers, lemon, and aromatic spices, grilled on live coals for that smoky finish.',
-    price: 65,
+    description: 'Grilled Croaker fish marinated in chili peppers, lemon, and aromatic spices, served with Fried Plantain & Chips.',
+    price: 25,
     image: '/images/rs=w_1160,h_1532.webp',
     category: 'grilled-fish',
     popular: true,
@@ -78,8 +78,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'chicken-bbq',
     name: 'Chicken BBQ',
-    description: 'Succulent chicken BBQ including juicy flame-grilled chicken legs, glazed in rich sticky house barbecue marinade.',
-    price: 40,
+    description: 'Succulent Chicken BBQ including chicken legs glazed in rich sticky sauce, served with Fried Plantain & Chips.',
+    price: 15,
     image: '/images/Frame 153.png',
     category: 'chicken-turkey',
     popular: true,
@@ -88,17 +88,17 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'chicken-thigh',
     name: 'Chicken Thigh',
-    description: 'Tender, juicy chicken thighs marinated in aromatic African herbs and flame-grilled for a rich, smoky taste.',
-    price: 35,
+    description: 'Tender chicken thighs marinated in aromatic African herbs and flame-grilled, served with Fried Plantain & Chips.',
+    price: 15,
     image: '/images/Frame 153.png',
     category: 'chicken-turkey',
     video: '/vids/chicken_wings.mp4',
   },
   {
     id: 'wings-stop',
-    name: 'Wings- stop',
-    description: 'Crispy and savory flame-grilled chicken wings seasoned to perfection with Tylicious special pepper blend.',
-    price: 30,
+    name: 'Grilled Chicken Wings (Wings-stop)',
+    description: 'Grilled Chicken Wings seasoned with Tylicious special pepper blend, served with Fried Plantain & Chips.',
+    price: 15,
     image: '/images/Frame 153.png',
     category: 'chicken-turkey',
     spicy: true,
@@ -107,8 +107,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'grilled-turkey',
     name: 'Grilled Turkey',
-    description: 'Sizzling tender turkey wings char-grilled with our house spices for an authentic, unforgettable smoky flavor.',
-    price: 50,
+    description: 'Sizzling tender turkey char-grilled with our house spices, served with Fried Plantain & Chips.',
+    price: 20,
     image: '/vids/turkey_thumbnail.jpg',
     category: 'chicken-turkey',
     video: '/vids/turkey_vid.mp4',
@@ -116,10 +116,20 @@ export const FULL_MENU_DATA: MenuItem[] = [
 
   // 3. Lamb & Beef
   {
-    id: 'lamb-chops-ribs',
-    name: 'Lamb Chops & Ribs',
-    description: 'Tender lamb chops and baby back ribs slow-cooked for hours and glazed with our rich sticky house honey-BBQ sauce.',
-    price: 85,
+    id: 'grilled-lamb-chops',
+    name: 'Grilled Lamb Chops',
+    description: 'Grilled Lamb Chops and ribs slow-cooked and glazed with sticky house BBQ sauce, served with Fried Plantain & Chips.',
+    price: 25,
+    image: '/images/rs=w_1536.webp',
+    category: 'lamb-beef',
+    popular: true,
+    video: '/vids/lamb_chops_ribs.mp4',
+  },
+  {
+    id: 'mixed-grill',
+    name: 'Mixed Grill',
+    description: 'Turkey, Lamb Chops & Lamb Ribs char-grilled and served with Fried Plantain & Chips.',
+    price: 35,
     image: '/images/rs=w_1536.webp',
     category: 'lamb-beef',
     popular: true,
@@ -128,8 +138,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'suya',
     name: 'Suya',
-    description: 'Succulent beef strips seasoned with authentic Nigerian Suya pepper blend, grilled over red-hot charcoal.',
-    price: 45,
+    description: 'Suya with fresh Tomatoes & Onions, seasoned with authentic Suya pepper, served with Fried Plantain & Chips.',
+    price: 15,
     image: '/images/Frame 153.png',
     category: 'lamb-beef',
     popular: true,
@@ -139,10 +149,10 @@ export const FULL_MENU_DATA: MenuItem[] = [
 
   // 4. Seafood
   {
-    id: 'jumbo-prawn',
-    name: 'Jumbo Prawn',
-    description: 'King jumbo prawns skewered and grilled over charcoal, brushed with rich garlic chili butter.',
-    price: 60,
+    id: 'grilled-prawns',
+    name: 'Grilled Prawns (Jumbo Prawn)',
+    description: 'Grilled Prawns skewered over charcoal and brushed with garlic chili butter, served with Fried Plantain & Chips.',
+    price: 15,
     image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
     category: 'seafood',
     video: '/vids/Tylicious Seafood Platter.mp4',
@@ -150,8 +160,8 @@ export const FULL_MENU_DATA: MenuItem[] = [
   {
     id: 'grilled-seafood-prawn',
     name: 'Grilled Seafood Prawn',
-    description: 'A grand feast of flame-grilled prawns and seafood delicacies seasoned with aromatic herbs and spicy garlic dip.',
-    price: 75,
+    description: 'Flame-grilled jumbo prawns and seafood delicacies seasoned with aromatic herbs, served with Fried Plantain & Chips.',
+    price: 25,
     image: '/images/Gemini_Generated_Image_cibfydcibfydcibf.png',
     category: 'seafood',
     popular: true,
@@ -160,9 +170,9 @@ export const FULL_MENU_DATA: MenuItem[] = [
 ];
 
 export const FAVORITES_DATA: MenuItem[] = [
-  FULL_MENU_DATA[0], // Grilled Catfish
-  FULL_MENU_DATA[1], // Grilled Tilapia Fish
-  FULL_MENU_DATA[2], // Grilled Croaker Fish
+  FULL_MENU_DATA[0], // Grilled Catfish - £25
+  FULL_MENU_DATA[1], // Grilled Tilapia Fish - £25
+  FULL_MENU_DATA[7], // Grilled Lamb Chops - £25
 ];
 
 export const TESTIMONIALS_DATA: Testimonial[] = [

@@ -29,10 +29,9 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
   }, []);
 
   const sidesOptions = [
-    { id: 'plantain', label: 'Sweet Fried Plantain' },
-    { id: 'mac-cheese', label: 'Mac & Cheese' },
-    { id: 'vermicelli', label: 'Vermicelli Noodles' },
-    { id: 'fried-chips', label: 'Fried Chips' },
+    { id: 'plantain-chips', label: 'Fried Plantain & Chips (Included)' },
+    { id: 'vermicelli', label: 'Vermicelli Noodles (+£8)' },
+    { id: 'mac-cheese', label: 'Mac & Cheese (+£7)' },
   ];
 
   const handleSideToggle = (sideId: string) => {
@@ -147,7 +146,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
           {/* Description */}
           <p className="font-sans text-[13.5px] leading-relaxed text-[#666666] mb-5">
-            {product.description || 'Fresh whole fish seasoned with Tylicious Grillz signature spices and flame-grilled to perfection. All fish meals are served with your choice of two delicious sides'}
+            {product.description || 'Freshly seasoned with Tylicious signature spices and flame-grilled to perfection. Served with Fried Plantain & Chips.'}
           </p>
 
           {/* Form Options Wrapper: scrolls internally on overflow but has scrollbar hidden */}
