@@ -1,1 +1,1 @@
-export { POST } from '@/app/api/webhook/route';
+export { POST, dynamic } from '@/app/api/webhook/route';

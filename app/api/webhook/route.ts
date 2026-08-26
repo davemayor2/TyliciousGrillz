@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { supabaseAdmin } from '@/libs/supabase/server';
 import { sendOrderNotifications } from '@/libs/email';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
