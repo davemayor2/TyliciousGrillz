@@ -87,6 +87,49 @@ export interface MenuItem {
   video?: string;
 }
 
+// Supabase Database Model Types
+export interface OptionValue {
+  id: string;
+  option_id?: string;
+  name: string;
+  price_modifier?: number;
+  price?: number;
+  is_default?: boolean;
+}
+
+export interface ProductOption {
+  id: string;
+  product_id?: string;
+  name: string;
+  min_selections?: number;
+  max_selections?: number;
+  option_values?: OptionValue[];
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  image?: string;
+  category?: string;
+  video?: string;
+  product_options?: ProductOption[];
+}
+
+export interface OrderItemOptionsPayload {
+  [category: string]: { name: string; price: number }[];
+}
+
+export interface OrderItemPayload {
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+  options: OrderItemOptionsPayload;
+}
+
 export interface Testimonial {
   id: string;
   name: string;

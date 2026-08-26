@@ -1,50 +1,216 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { MenuItem } from '@/types';
-import { X } from 'lucide-react';
+import { MenuItem, Product, ProductOption, OptionValue } from '@/types';
+import { X, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { supabase } from '@/libs/supabase';
 
 interface ProductOptionsModalProps {
   product: MenuItem;
   onClose: () => void;
 }
 
+// Default Fallback Options matching the Tylicious Grillz menu structure
+const DEFAULT_FALLBACK_OPTIONS: ProductOption[] = [
+  {
+    id: 'opt_spice_level',
+    name: 'Spice Level',
+    min_selections: 1,
+    max_selections: 1,
+    option_values: [
+      { id: 'val_mild', name: 'Mild', price_modifier: 0, is_default: false },
+      { id: 'val_medium', name: 'Medium', price_modifier: 0, is_default: true },
+      { id: 'val_hot', name: 'Hot', price_modifier: 0, is_default: false },
+      { id: 'val_extra_spicy', name: 'Extra Spicy', price_modifier: 0, is_default: false },
+    ],
+  },
+  {
+    id: 'opt_extra_sides',
+    name: 'Add an Extra Side',
+    min_selections: 0,
+    max_selections: 2,
+    option_values: [
+      { id: 'val_plantain_chips', name: 'Fried Plantain & Chips (Included)', price_modifier: 0, is_default: true },
+      { id: 'val_vermicelli', name: 'Vermicelli Noodles', price_modifier: 8, is_default: false },
+      { id: 'val_mac_cheese', name: 'Mac & Cheese', price_modifier: 7, is_default: false },
+    ],
+  },
+];
+
 export default function ProductOptionsModal({ product, onClose }: ProductOptionsModalProps) {
   const { addToCart, setIsCartOpen } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [spiceLevel, setSpiceLevel] = useState<'Mild' | 'Medium' | 'Hot' | 'Extra Spicy'>('Medium');
-  const [selectedSides, setSelectedSides] = useState<string[]>([]);
   const [specialNotes, setSpecialNotes] = useState('');
   const [mounted, setMounted] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Supabase Product Options Data
+  const [productData, setProductData] = useState<Product | null>(null);
+  const [optionsList, setOptionsList] = useState<ProductOption[]>(DEFAULT_FALLBACK_OPTIONS);
+
+  // State object mapping option_id -> array of selected OptionValue objects
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, OptionValue[]>>({});
+
+  // Helper to initialize default selections for options
+  const initDefaultSelections = useCallback((options: ProductOption[]) => {
+    const initial: Record<string, OptionValue[]> = {};
+    options.forEach((opt) => {
+      const vals = opt.option_values || [];
+      if (opt.max_selections === 1) {
+        // Single-select: pick the marked default or the first option
+        const defaultVal = vals.find((v) => v.is_default) || vals[0];
+        if (defaultVal) {
+          initial[opt.id] = [defaultVal];
+        }
+      } else {
+        // Multi-select: pick all marked defaults up to max_selections
+        const defaultVals = vals.filter((v) => v.is_default);
+        const max = opt.max_selections || 2;
+        initial[opt.id] = defaultVals.slice(0, max);
+      }
+    });
+    setSelectedOptions(initial);
+  }, []);
+
+  // Fetch product along with nested options and values from Supabase
   useEffect(() => {
     setMounted(true);
     document.body.style.overflow = 'hidden';
+
+    let isSubscribed = true;
+
+    async function fetchProductWithOptions() {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, product_options(*, option_values(*))')
+          .eq('id', product.id)
+          .maybeSingle();
+
+        if (!isSubscribed) return;
+
+        if (!error && data && data.product_options && data.product_options.length > 0) {
+          setProductData(data);
+          setOptionsList(data.product_options);
+          initDefaultSelections(data.product_options);
+        } else {
+          // Fallback to default schema-compliant options
+          setOptionsList(DEFAULT_FALLBACK_OPTIONS);
+          initDefaultSelections(DEFAULT_FALLBACK_OPTIONS);
+        }
+      } catch (err) {
+        console.warn('Supabase product options query:', err);
+        if (isSubscribed) {
+          setOptionsList(DEFAULT_FALLBACK_OPTIONS);
+          initDefaultSelections(DEFAULT_FALLBACK_OPTIONS);
+        }
+      } finally {
+        if (isSubscribed) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchProductWithOptions();
+
     return () => {
+      isSubscribed = false;
       document.body.style.overflow = '';
     };
-  }, []);
+  }, [product.id, initDefaultSelections]);
 
-  const sidesOptions = [
-    { id: 'plantain-chips', label: 'Fried Plantain & Chips (Included)' },
-    { id: 'vermicelli', label: 'Vermicelli Noodles (+£8)' },
-    { id: 'mac-cheese', label: 'Mac & Cheese (+£7)' },
-  ];
+  // Handle Option Value Toggle
+  const handleOptionToggle = (option: ProductOption, value: OptionValue) => {
+    const isSingleSelect = option.max_selections === 1;
+    const currentSelections = selectedOptions[option.id] || [];
+    const isAlreadySelected = currentSelections.some((v) => v.id === value.id || v.name === value.name);
 
-  const handleSideToggle = (sideId: string) => {
-    setSelectedSides((prev) =>
-      prev.includes(sideId) ? prev.filter((id) => id !== sideId) : [...prev, sideId]
-    );
+    if (isSingleSelect) {
+      // Single-select radio button behavior
+      setSelectedOptions((prev) => ({
+        ...prev,
+        [option.id]: [value],
+      }));
+    } else {
+      // Multi-select toggle behavior with max_selections enforcement (e.g. max 2)
+      const maxAllowed = option.max_selections || 2;
+
+      if (isAlreadySelected) {
+        setSelectedOptions((prev) => ({
+          ...prev,
+          [option.id]: currentSelections.filter((v) => v.id !== value.id && v.name !== value.name),
+        }));
+      } else {
+        if (currentSelections.length >= maxAllowed) {
+          // Replace oldest selection if max is reached or reject
+          setSelectedOptions((prev) => ({
+            ...prev,
+            [option.id]: [...currentSelections.slice(1), value],
+          }));
+        } else {
+          setSelectedOptions((prev) => ({
+            ...prev,
+            [option.id]: [...currentSelections, value],
+          }));
+        }
+      }
+    }
   };
+
+  // Dynamic Price Calculation
+  const calculatedTotal = useMemo(() => {
+    const base = Number(productData?.price ?? product.price);
+
+    // Sum price modifiers of all currently selected options
+    const modifiersTotal = Object.values(selectedOptions).reduce((sum, values) => {
+      const optSum = values.reduce((vSum, val) => {
+        const mod = Number(val.price_modifier ?? val.price ?? 0);
+        return vSum + mod;
+      }, 0);
+      return sum + optSum;
+    }, 0);
+
+    const unit = base + modifiersTotal;
+    return Number((unit * quantity).toFixed(2));
+  }, [productData, product.price, selectedOptions, quantity]);
 
   const handleIncrement = () => setQuantity((prev) => prev + 1);
   const handleDecrement = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
+  // Add to Cart with formatted JSONB Order Item Payload
   const handleAdd = () => {
-    addToCart(product, quantity, spiceLevel, selectedSides, specialNotes);
+    // 1. Format options dictionary mapping option category name -> [{ name, price }]
+    const formattedOptions: Record<string, { name: string; price: number }[]> = {};
+
+    optionsList.forEach((opt) => {
+      const selectedVals = selectedOptions[opt.id] || [];
+      if (selectedVals.length > 0) {
+        formattedOptions[opt.name] = selectedVals.map((v) => ({
+          name: v.name,
+          price: Number(v.price_modifier ?? v.price ?? 0),
+        }));
+      }
+    });
+
+    // 2. Extract legacy helper strings for drawer / backwards compatibility
+    const spiceLevelVal = selectedOptions['opt_spice_level']?.[0]?.name || 'Medium';
+    const sidesList = (selectedOptions['opt_extra_sides'] || []).map((s) => s.name);
+
+    // 3. Dispatch to cart state with formatted JSONB structure & calculatedTotal
+    addToCart(
+      product,
+      quantity,
+      spiceLevelVal as MenuItem['category'],
+      sidesList,
+      specialNotes,
+      calculatedTotal,
+      formattedOptions
+    );
+
     setShowSuccess(true);
   };
 
@@ -71,12 +237,12 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
       {showSuccess ? (
         /* Added to Basket Success Confirmation Popup Modal */
-        <div className="relative w-full max-w-[460px] bg-white border border-[#E63900]/10 rounded-[28px] p-[36px_32px_32px_32px] flex flex-col items-center text-center z-10 shadow-[12px_12px_0px_#FFD8D8] animate-pop overflow-visible animate-backdrop-fade">
+        <div className="relative w-full max-w-[460px] bg-white border border-[#E63900]/10 rounded-[28px] p-[36px_32px_32px_32px] flex flex-col items-center text-center z-10 shadow-[12px_12px_0px_#FFD8D8] animate-pop overflow-visible">
 
-          {/* Top Animation SVG Placeholder */}
+          {/* Top Animation SVG / Image */}
           <div id="top-animation-placeholder" className="w-24 h-24 mb-4 flex items-center justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/add to cart 2.gif" alt="Success Animation" className="w-full h-full" />
+            <img src="/add to cart 2.gif" alt="Success Animation" className="w-full h-full object-contain" />
           </div>
 
           {/* Success Heading */}
@@ -88,13 +254,13 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
           </div>
 
           {/* Item Summary */}
-          <p className="font-sans text-[14.5px] leading-relaxed text-[#666666] mb-4">
+          <p className="font-sans text-[14.5px] leading-relaxed text-[#666666] mb-1">
             {product.name} × {quantity}
           </p>
 
           {/* Price Display */}
-          <div className="font-sans font-bold text-black text-xl mb-7">
-            £{(product.price * quantity).toFixed(2)}
+          <div className="font-sans font-bold text-black text-2xl mb-7">
+            £{calculatedTotal.toFixed(2)}
           </div>
 
           {/* Action Button Row */}
@@ -113,7 +279,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
                 setIsCartOpen(true);
                 onClose();
               }}
-              className="w-1/2 flex items-center justify-between bg-[#E63900] hover:bg-[#ff440a] rounded-full py-2 pr-2 pl-5 transition-colors duration-200 cursor-pointer select-none text-center"
+              className="w-1/2 flex items-center justify-between bg-[#E63900] hover:bg-[#ff440a] rounded-full py-2.5 pr-2.5 pl-5 transition-colors duration-200 cursor-pointer select-none text-center shadow-[0px_4px_12px_rgba(230,57,0,0.25)]"
             >
               <span className="text-white font-sans font-bold text-[14px] md:text-[15px]">
                 View Basket
@@ -131,11 +297,16 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
 
           {/* Modal Header */}
           <div className="flex items-start justify-between gap-4 mb-2">
-            <h3 className="font-judson font-normal text-[28px] text-black leading-tight">
-              {product.name}
-            </h3>
+            <div>
+              <h3 className="font-judson font-normal text-[28px] text-black leading-tight">
+                {product.name}
+              </h3>
+              <span className="font-sans font-bold text-[#E63900] text-lg">
+                £{product.price.toFixed(2)}
+              </span>
+            </div>
 
-            {/* Close Button (Top-Right): circular with peach background tint and border */}
+            {/* Close Button (Top-Right) */}
             <button
               onClick={onClose}
               className="w-9 h-9 rounded-full bg-[#FFF5F5] hover:bg-[#FFE3E3] border-[1.5px] border-[#FF8A8A] flex items-center justify-center text-black transition-colors cursor-pointer shrink-0"
@@ -149,60 +320,60 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
             {product.description || 'Freshly seasoned with Tylicious signature spices and flame-grilled to perfection. Served with Fried Plantain & Chips.'}
           </p>
 
-          {/* Form Options Wrapper: scrolls internally on overflow but has scrollbar hidden */}
+          {/* Form Options Wrapper: scrolls internally on overflow */}
           <div className="flex-1 overflow-y-auto max-h-[45vh] pr-1 flex flex-col gap-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
-            {/* Section 1: Spice Level (Radio Group) */}
-            <div className="flex flex-col items-start w-full">
-              <span className="font-sans font-bold text-black text-base mb-2.5">
-                Spice Level*
-              </span>
-              <div className="flex flex-wrap gap-2.5 w-full">
-                {(['Mild', 'Medium', 'Hot', 'Extra Spicy'] as const).map((level) => {
-                  const isSelected = spiceLevel === level;
-                  return (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setSpiceLevel(level)}
-                      className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${isSelected
-                        ? 'bg-[#E63900] border-transparent text-white'
-                        : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
-                        }`}
-                    >
-                      {level}
-                    </button>
-                  );
-                })}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-10 gap-2 text-brand-orange">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="font-sans text-sm font-semibold">Loading options...</span>
               </div>
-            </div>
+            ) : (
+              optionsList.map((option) => {
+                const currentVals = selectedOptions[option.id] || [];
 
-            {/* Section 2: Choose Your Sides (Checklist Group) */}
-            <div className="flex flex-col items-start w-full">
-              <span className="font-sans font-bold text-black text-base mb-2.5">
-                Choose Your Sides (Optional)
-              </span>
-              <div className="flex flex-wrap gap-2.5 w-full">
-                {sidesOptions.map((side) => {
-                  const isChecked = selectedSides.includes(side.id);
-                  return (
-                    <button
-                      key={side.id}
-                      type="button"
-                      onClick={() => handleSideToggle(side.id)}
-                      className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${isChecked
-                        ? 'bg-[#E63900] border-transparent text-white'
-                        : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
-                        }`}
-                    >
-                      {side.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                return (
+                  <div key={option.id} className="flex flex-col items-start w-full">
+                    <div className="flex items-center justify-between w-full mb-2.5">
+                      <span className="font-sans font-bold text-black text-base">
+                        {option.name}
+                        {option.min_selections && option.min_selections > 0 ? '*' : ''}
+                      </span>
+                      {option.max_selections && option.max_selections > 1 && (
+                        <span className="font-sans text-xs text-[#888888]">
+                          (Select up to {option.max_selections})
+                        </span>
+                      )}
+                    </div>
 
-            {/* Section 3: Special Notes (Textarea) */}
+                    <div className="flex flex-wrap gap-2.5 w-full">
+                      {(option.option_values || []).map((val) => {
+                        const isSelected = currentVals.some((v) => v.id === val.id || v.name === val.name);
+                        const modifier = Number(val.price_modifier ?? val.price ?? 0);
+                        const priceLabel = modifier > 0 ? ` (+£${modifier.toFixed(0)})` : '';
+
+                        return (
+                          <button
+                            key={val.id}
+                            type="button"
+                            onClick={() => handleOptionToggle(option, val)}
+                            className={`px-4 py-2 rounded-full border-[1.5px] font-sans font-semibold text-xs md:text-sm text-center transition-all duration-150 cursor-pointer select-none ${
+                              isSelected
+                                ? 'bg-[#E63900] border-transparent text-white shadow-sm'
+                                : 'bg-white border-[#E63900] text-[#2A0300] hover:bg-[#FFF5F5]'
+                            }`}
+                          >
+                            {val.name}{priceLabel}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {/* Special Notes / Instructions */}
             <div className="flex flex-col items-start w-full">
               <label htmlFor="modal-notes" className="font-sans font-bold text-black text-base mb-2.5 select-none">
                 Special Notes/Instructions
@@ -211,8 +382,8 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
                 id="modal-notes"
                 value={specialNotes}
                 onChange={(e) => setSpecialNotes(e.target.value)}
-                placeholder="No chips Please"
-                className="w-full h-24 px-4 py-3 bg-white border-[1.5px] border-[#E63900] rounded-[16px] text-black font-sans text-sm placeholder:text-[#666666] focus:outline-none focus:border-[#E63900] transition-colors resize-none"
+                placeholder="E.g. Extra spicy sauce, packaging instructions"
+                className="w-full h-20 px-4 py-3 bg-white border-[1.5px] border-[#E63900] rounded-[16px] text-black font-sans text-sm placeholder:text-[#666666] focus:outline-none focus:border-[#E63900] transition-colors resize-none"
               />
             </div>
 
@@ -240,14 +411,19 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
               </button>
             </div>
 
-            {/* Add to Cart Button (Right) */}
+            {/* Add to Cart Button (Right) with Dynamic Price */}
             <button
               onClick={handleAdd}
-              className="flex-1 flex items-center justify-between bg-[#E63900] hover:bg-[#ff440a] rounded-full py-2 pr-2 pl-6 transition-colors duration-200 cursor-pointer select-none"
+              className="flex-1 flex items-center justify-between bg-[#E63900] hover:bg-[#ff440a] rounded-full py-2 pr-2 pl-6 transition-colors duration-200 cursor-pointer select-none shadow-[0px_4px_12px_rgba(230,57,0,0.25)]"
             >
-              <span className="text-white font-sans font-bold text-base">
-                Add to Cart
-              </span>
+              <div className="flex flex-col items-start text-left">
+                <span className="text-white font-sans font-bold text-base leading-tight">
+                  Add to Cart
+                </span>
+                <span className="text-white/80 font-sans text-xs">
+                  £{calculatedTotal.toFixed(2)}
+                </span>
+              </div>
 
               {/* White Circular Badge with Right Arrow */}
               <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#E63900] shrink-0 font-bold text-lg">
