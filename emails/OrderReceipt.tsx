@@ -21,7 +21,7 @@ export interface OrderItemData {
   quantity: number;
   unit_price: number;
   total: number;
-  options?: Record<string, { name: string; price: number }[]> | { spice_level?: string; sides?: string[]; special_notes?: string };
+  options?: unknown;
 }
 
 export interface OrderData {
@@ -43,6 +43,85 @@ export interface OrderData {
 interface OrderReceiptProps {
   order: OrderData;
   order_items: OrderItemData[];
+}
+
+/**
+ * Extracts and formats all nested options (Spice level, sides, extras) regardless of payload format
+ */
+export function extractItemOptions(options: unknown): { label: string; values: string }[] {
+  if (!options) return [];
+
+  let parsed = options;
+  if (typeof parsed === 'string') {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch {
+      return [{ label: 'Option', values: String(parsed) }];
+    }
+  }
+
+  const result: { label: string; values: string }[] = [];
+
+  if (Array.isArray(parsed)) {
+    const list = parsed
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object' && 'name' in item) {
+          const price = Number((item as { price?: number }).price || 0);
+          return `${(item as { name: string }).name}${price > 0 ? ` (+£${price.toFixed(2)})` : ''}`;
+        }
+        return String(item);
+      })
+      .filter(Boolean);
+
+    if (list.length > 0) {
+      result.push({ label: 'Selected Options', values: list.join(', ') });
+    }
+    return result;
+  }
+
+  if (parsed && typeof parsed === 'object') {
+    const obj = parsed as Record<string, unknown>;
+
+    // Handle standard keys
+    if (obj.spice_level && typeof obj.spice_level === 'string') {
+      result.push({ label: 'Spice Level', values: obj.spice_level });
+    }
+
+    if (Array.isArray(obj.sides) && obj.sides.length > 0) {
+      result.push({ label: 'Sides', values: obj.sides.join(', ') });
+    }
+
+    if (obj.special_notes && typeof obj.special_notes === 'string') {
+      result.push({ label: 'Special Notes', values: obj.special_notes });
+    }
+
+    // Handle generic dictionary keys (e.g. "Spice Level", "Add an Extra Side", "Sides")
+    Object.entries(obj).forEach(([key, val]) => {
+      if (['spice_level', 'sides', 'special_notes'].includes(key)) return;
+
+      if (Array.isArray(val) && val.length > 0) {
+        const names = val
+          .map((v) => {
+            if (typeof v === 'string') return v;
+            if (v && typeof v === 'object' && 'name' in v) {
+              const price = Number((v as { price?: number }).price || 0);
+              return `${(v as { name: string }).name}${price > 0 ? ` (+£${price.toFixed(2)})` : ''}`;
+            }
+            return String(v);
+          })
+          .filter(Boolean);
+
+        if (names.length > 0) {
+          result.push({ label: key, values: names.join(', ') });
+        }
+      } else if (typeof val === 'string' && val.trim()) {
+        result.push({ label: key, values: val });
+      }
+    });
+  }
+
+  return result;
 }
 
 export const OrderReceipt: React.FC<OrderReceiptProps> = ({ order, order_items = [] }) => {
@@ -115,47 +194,48 @@ export const OrderReceipt: React.FC<OrderReceiptProps> = ({ order, order_items =
             {/* Items Table */}
             <Section style={itemsSection}>
               <Heading as="h3" style={sectionTitle}>
-                Order Summary
+                Items Ordered ({order_items.reduce((s, i) => s + (Number(i.quantity) || 1), 0)} items)
               </Heading>
               <Hr style={divider} />
 
-              {order_items.map((item, index) => {
-                // Extract formatted options summary
-                const optionsSummary: string[] = [];
-                if (item.options) {
-                  if (typeof item.options === 'object' && !('spice_level' in item.options)) {
-                    Object.entries(item.options).forEach(([cat, vals]) => {
-                      if (Array.isArray(vals)) {
-                        optionsSummary.push(`${cat}: ${vals.map((v) => v.name).join(', ')}`);
-                      }
-                    });
-                  } else {
-                    const opt = item.options as { spice_level?: string; sides?: string[]; special_notes?: string };
-                    if (opt.spice_level) optionsSummary.push(`Spice: ${opt.spice_level}`);
-                    if (opt.sides && opt.sides.length) optionsSummary.push(`Sides: ${opt.sides.join(', ')}`);
-                    if (opt.special_notes) optionsSummary.push(`Notes: ${opt.special_notes}`);
-                  }
-                }
+              {order_items.length === 0 ? (
+                <Text style={{ color: '#666', fontSize: '13px', fontStyle: 'italic' }}>
+                  Items are being processed with your order summary.
+                </Text>
+              ) : (
+                order_items.map((item, index) => {
+                  const optionsList = extractItemOptions(item.options);
 
-                return (
-                  <div key={index} style={itemRow}>
-                    <Row>
-                      <Column style={{ width: '70%' }}>
-                        <Text style={itemName}>
-                          {item.product_name} <span style={itemQty}>× {item.quantity}</span>
-                        </Text>
-                        {optionsSummary.length > 0 && (
-                          <Text style={itemOptions}>{optionsSummary.join(' • ')}</Text>
-                        )}
-                      </Column>
-                      <Column style={{ width: '30%', textAlign: 'right' }}>
-                        <Text style={itemPrice}>£{Number(item.total).toFixed(2)}</Text>
-                      </Column>
-                    </Row>
-                    <Hr style={itemDivider} />
-                  </div>
-                );
-              })}
+                  return (
+                    <div key={index} style={itemCard}>
+                      <Row>
+                        <Column style={{ width: '75%' }}>
+                          <Text style={itemName}>
+                            {item.quantity}× {item.product_name}
+                          </Text>
+
+                          {/* Selected Side Options & Spice Level */}
+                          {optionsList.length > 0 && (
+                            <div style={optionsContainer}>
+                              {optionsList.map((opt, oIdx) => (
+                                <Text key={oIdx} style={optionRowText}>
+                                  <strong style={{ color: '#ED2C02' }}>{opt.label}:</strong> {opt.values}
+                                </Text>
+                              ))}
+                            </div>
+                          )}
+                        </Column>
+                        <Column style={{ width: '25%', textAlign: 'right', verticalAlign: 'top' }}>
+                          <Text style={itemPrice}>£{Number(item.total).toFixed(2)}</Text>
+                          <Text style={unitPriceText}>
+                            (£{Number(item.unit_price).toFixed(2)} each)
+                          </Text>
+                        </Column>
+                      </Row>
+                    </div>
+                  );
+                })
+              )}
 
               {/* Price Breakdown */}
               <Section style={summarySection}>
@@ -191,8 +271,8 @@ export const OrderReceipt: React.FC<OrderReceiptProps> = ({ order, order_items =
             <Section style={helpBox}>
               <Text style={helpText}>
                 Need to amend your order or have questions? Contact us at{' '}
-                <Link href="tel:+447000000000" style={helpLink}>
-                  our customer support
+                <Link href="mailto:order@tyliciousgrillz.com" style={helpLink}>
+                  order@tyliciousgrillz.com
                 </Link>{' '}
                 or reply directly to this email.
               </Text>
@@ -239,7 +319,7 @@ const container = {
 
 const headerSection = {
   backgroundColor: '#ED2C02',
-  padding: '28px 24px',
+  padding: '32px 24px',
   textAlign: 'center' as const,
 };
 
@@ -255,53 +335,51 @@ const headerSubtitle = {
   color: '#FFE6E0',
   fontSize: '13px',
   margin: '0',
-  letterSpacing: '0.5px',
 };
 
 const contentSection = {
-  padding: '28px 28px 20px 28px',
+  padding: '28px 24px',
 };
 
 const orderGreeting = {
   color: '#1A0500',
   fontSize: '20px',
   fontWeight: '700',
-  margin: '0 0 8px 0',
+  margin: '0 0 6px 0',
 };
 
 const orderIntro = {
-  color: '#555555',
+  color: '#666666',
   fontSize: '14px',
-  lineHeight: '22px',
+  lineHeight: '20px',
   margin: '0 0 20px 0',
 };
 
 const metaBox = {
-  backgroundColor: '#FFE6E0',
-  border: '1.5px solid #1A0500',
+  backgroundColor: '#FFF5F2',
   borderRadius: '16px',
   padding: '16px 20px',
+  border: '1.5px solid #FFD0C5',
   marginBottom: '24px',
 };
 
 const metaLabel = {
-  color: '#882200',
+  color: '#888888',
   fontSize: '10px',
   fontWeight: '700',
   letterSpacing: '0.8px',
   margin: '0 0 2px 0',
-  textTransform: 'uppercase' as const,
 };
 
 const metaValue = {
   color: '#1A0500',
-  fontSize: '14px',
+  fontSize: '13px',
   fontWeight: '600',
   margin: '0',
 };
 
 const itemsSection = {
-  marginBottom: '20px',
+  marginBottom: '24px',
 };
 
 const sectionTitle = {
@@ -312,48 +390,59 @@ const sectionTitle = {
 };
 
 const divider = {
-  borderTop: '1.5px solid #1A0500',
-  margin: '8px 0 16px 0',
+  borderTop: '1.5px solid #EFEFEF',
+  margin: '12px 0',
 };
 
-const itemRow = {
-  marginBottom: '12px',
+const itemCard = {
+  backgroundColor: '#FAFAFA',
+  border: '1px solid #EAEAEA',
+  borderRadius: '12px',
+  padding: '12px 14px',
+  marginBottom: '10px',
 };
 
 const itemName = {
   color: '#1A0500',
-  fontSize: '14px',
+  fontSize: '15px',
   fontWeight: '700',
-  margin: '0 0 2px 0',
+  margin: '0 0 4px 0',
 };
 
-const itemQty = {
-  color: '#ED2C02',
-  fontSize: '13px',
-  fontWeight: '800',
+const optionsContainer = {
+  backgroundColor: '#FFFFFF',
+  borderRadius: '8px',
+  padding: '6px 10px',
+  border: '1px solid #F0E0DB',
+  marginTop: '4px',
 };
 
-const itemOptions = {
-  color: '#777777',
+const optionRowText = {
+  color: '#444444',
   fontSize: '12px',
-  lineHeight: '16px',
-  margin: '0',
+  lineHeight: '18px',
+  margin: '2px 0',
 };
 
 const itemPrice = {
   color: '#1A0500',
-  fontSize: '14px',
+  fontSize: '15px',
   fontWeight: '700',
+  margin: '0 0 2px 0',
+};
+
+const unitPriceText = {
+  color: '#888888',
+  fontSize: '11px',
   margin: '0',
 };
 
-const itemDivider = {
-  borderTop: '1px dashed #E5D5D0',
-  margin: '10px 0',
-};
-
 const summarySection = {
-  marginTop: '12px',
+  backgroundColor: '#FFF9F6',
+  borderRadius: '16px',
+  padding: '16px 20px',
+  border: '1.5px solid #FFD0C5',
+  marginTop: '16px',
 };
 
 const summaryRow = {
@@ -388,11 +477,10 @@ const grandTotalValue = {
 };
 
 const helpBox = {
-  backgroundColor: '#FFF5F2',
+  backgroundColor: '#F8F9FA',
   borderRadius: '12px',
-  padding: '12px 16px',
-  marginTop: '16px',
-  border: '1px solid #FFD0C5',
+  padding: '14px 16px',
+  textAlign: 'center' as const,
 };
 
 const helpText = {
@@ -400,18 +488,17 @@ const helpText = {
   fontSize: '12px',
   lineHeight: '18px',
   margin: '0',
-  textAlign: 'center' as const,
 };
 
 const helpLink = {
   color: '#ED2C02',
-  fontWeight: 'bold',
+  fontWeight: '600',
   textDecoration: 'underline',
 };
 
 const footerSection = {
   backgroundColor: '#1A0500',
-  padding: '18px 24px',
+  padding: '20px 24px',
   textAlign: 'center' as const,
 };
 
@@ -423,7 +510,7 @@ const footerText = {
 };
 
 const footerSubtext = {
-  color: '#FFB2A1',
+  color: '#999999',
   fontSize: '11px',
   margin: '0',
 };

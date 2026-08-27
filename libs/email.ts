@@ -82,7 +82,23 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
 
     const orderData = order as OrderData;
 
-    console.log(`📧 Pre-rendering HTML templates for Order #${orderData.id} (Total: £${orderData.total})...`);
+    // 2. Ensure order_items are loaded even if nested join is empty
+    if (!orderItems || orderItems.length === 0) {
+      const { data: explicitItems, error: itemsError } = await supabaseAdmin
+        .from('order_items')
+        .select('*')
+        .eq('order_id', orderData.id);
+
+      if (explicitItems && explicitItems.length > 0) {
+        orderItems = explicitItems as OrderItemData[];
+        console.log(`📦 Loaded ${orderItems.length} explicit order_items from order_items table for Order #${orderData.id}`);
+      }
+      if (itemsError) {
+        console.warn('⚠️ Explicit order_items query notice:', itemsError.message);
+      }
+    }
+
+    console.log(`📧 Pre-rendering HTML templates for Order #${orderData.id} (${orderItems.length} items, Total: £${orderData.total})...`);
 
     // 2. Pre-render React Email templates to static HTML strings
     const receiptHtml = await render(

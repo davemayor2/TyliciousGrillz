@@ -13,7 +13,7 @@ import {
   Hr,
   Link,
 } from '@react-email/components';
-import { OrderData, OrderItemData } from './OrderReceipt';
+import { OrderData, OrderItemData, extractItemOptions } from './OrderReceipt';
 
 interface NewOrderAlertProps {
   order: OrderData;
@@ -125,49 +125,43 @@ export const NewOrderAlert: React.FC<NewOrderAlertProps> = ({ order, order_items
             {/* Kitchen Prep Items */}
             <Section style={kitchenSection}>
               <Heading as="h3" style={boxTitle}>
-                Items to Prepare ({order_items.reduce((s, i) => s + (i.quantity || 1), 0)} items)
+                Items to Prepare ({order_items.reduce((s, i) => s + (Number(i.quantity) || 1), 0)} items)
               </Heading>
               <Hr style={innerDivider} />
 
-              {order_items.map((item, index) => {
-                const optionsSummary: string[] = [];
-                if (item.options) {
-                  if (typeof item.options === 'object' && !('spice_level' in item.options)) {
-                    Object.entries(item.options).forEach(([cat, vals]) => {
-                      if (Array.isArray(vals)) {
-                        optionsSummary.push(`${cat}: ${vals.map((v) => v.name).join(', ')}`);
-                      }
-                    });
-                  } else {
-                    const opt = item.options as { spice_level?: string; sides?: string[]; special_notes?: string };
-                    if (opt.spice_level) optionsSummary.push(`Spice: ${opt.spice_level}`);
-                    if (opt.sides && opt.sides.length) optionsSummary.push(`Sides: ${opt.sides.join(', ')}`);
-                    if (opt.special_notes) optionsSummary.push(`Notes: ${opt.special_notes}`);
-                  }
-                }
+              {order_items.length === 0 ? (
+                <Text style={{ color: '#666', fontSize: '13px', fontStyle: 'italic' }}>
+                  No items listed in payload.
+                </Text>
+              ) : (
+                order_items.map((item, index) => {
+                  const optionsList = extractItemOptions(item.options);
 
-                return (
-                  <div key={index} style={kitchenItemBox}>
-                    <Row>
-                      <Column style={{ width: '15%' }}>
-                        <Text style={kitchenQtyBadge}>{item.quantity}×</Text>
-                      </Column>
-                      <Column style={{ width: '85%' }}>
-                        <Text style={kitchenItemTitle}>{item.product_name}</Text>
-                        {optionsSummary.length > 0 && (
-                          <div style={kitchenOptionsBox}>
-                            {optionsSummary.map((opt, oIdx) => (
-                              <Text key={oIdx} style={kitchenOptionText}>
-                                • {opt}
-                              </Text>
-                            ))}
-                          </div>
-                        )}
-                      </Column>
-                    </Row>
-                  </div>
-                );
-              })}
+                  return (
+                    <div key={index} style={kitchenItemBox}>
+                      <Row>
+                        <Column style={{ width: '15%', verticalAlign: 'top' }}>
+                          <Text style={kitchenQtyBadge}>{item.quantity}×</Text>
+                        </Column>
+                        <Column style={{ width: '85%', verticalAlign: 'top' }}>
+                          <Text style={kitchenItemTitle}>{item.product_name}</Text>
+                          
+                          {/* Item Customizations and Side Choices */}
+                          {optionsList.length > 0 && (
+                            <div style={kitchenOptionsBox}>
+                              {optionsList.map((opt, oIdx) => (
+                                <Text key={oIdx} style={kitchenOptionText}>
+                                  <strong style={{ color: '#ED2C02' }}>{opt.label}:</strong> {opt.values}
+                                </Text>
+                              ))}
+                            </div>
+                          )}
+                        </Column>
+                      </Row>
+                    </div>
+                  );
+                })
+              )}
             </Section>
 
             {/* Revenue Summary */}
@@ -337,16 +331,17 @@ const kitchenItemTitle = {
 
 const kitchenOptionsBox = {
   backgroundColor: '#FFFFFF',
-  borderRadius: '6px',
-  padding: '6px 10px',
+  borderRadius: '8px',
+  padding: '8px 12px',
   border: '1px solid #FFD0C5',
+  marginTop: '6px',
 };
 
 const kitchenOptionText = {
-  color: '#882200',
+  color: '#333333',
   fontSize: '12px',
-  fontWeight: '600',
-  margin: '0 0 2px 0',
+  lineHeight: '18px',
+  margin: '3px 0',
 };
 
 const revenueBox = {
