@@ -85,11 +85,18 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
     async function fetchProductWithOptions() {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('products')
-          .select('*, product_options(*, option_values(*))')
-          .eq('id', product.id)
-          .maybeSingle();
+          .select('*, product_options(*, option_values(*))');
+
+        const isNumeric = /^\d+$/.test(String(product.id));
+        if (isNumeric) {
+          query = query.eq('id', Number(product.id));
+        } else {
+          query = query.or(`slug.eq.${product.id},name.ilike.%${product.name}%`);
+        }
+
+        const { data, error } = await query.maybeSingle();
 
         if (!isSubscribed) return;
 
@@ -98,6 +105,9 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
           setOptionsList(data.product_options);
           initDefaultSelections(data.product_options);
         } else {
+          if (data) {
+            setProductData(data);
+          }
           // Fallback to default schema-compliant options
           setOptionsList(DEFAULT_FALLBACK_OPTIONS);
           initDefaultSelections(DEFAULT_FALLBACK_OPTIONS);
@@ -121,7 +131,7 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
       isSubscribed = false;
       document.body.style.overflow = '';
     };
-  }, [product.id, initDefaultSelections]);
+  }, [product.id, product.name, initDefaultSelections]);
 
   // Handle Option Value Toggle
   const handleOptionToggle = (option: ProductOption, value: OptionValue) => {
@@ -200,9 +210,14 @@ export default function ProductOptionsModal({ product, onClose }: ProductOptions
     const spiceLevelVal = selectedOptions['opt_spice_level']?.[0]?.name || 'Medium';
     const sidesList = (selectedOptions['opt_extra_sides'] || []).map((s) => s.name);
 
-    // 3. Dispatch to cart state with formatted JSONB structure & calculatedTotal
+    // 3. Dispatch to cart state with numerical product ID if available & formatted JSONB structure
+    const targetProduct: MenuItem = {
+      ...product,
+      id: productData?.id ? String(productData.id) : product.id,
+    };
+
     addToCart(
-      product,
+      targetProduct,
       quantity,
       spiceLevelVal as MenuItem['category'],
       sidesList,

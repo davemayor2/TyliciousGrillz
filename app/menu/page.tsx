@@ -11,10 +11,13 @@ import Specials from '@/components/sections/menu/Specials';
 import Delivery from '@/components/sections/menu/Delivery';
 import Contact from '@/components/sections/menu/Contact';
 import { FULL_MENU_DATA } from '@/constants';
+import { supabase } from '@/libs/supabase/client';
+import { MenuItem } from '@/types';
 
 function MenuContent() {
   const searchParams = useSearchParams();
   const [activeCategory, setActiveCategory] = useState('all');
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(FULL_MENU_DATA);
 
   useEffect(() => {
     const cat = searchParams.get('category');
@@ -23,9 +26,40 @@ function MenuContent() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    async function loadDbProducts() {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, slug, price');
+
+        if (!error && data && data.length > 0) {
+          const dbMap = new Map<string, string | number>();
+          data.forEach((p) => {
+            if (p.slug) dbMap.set(String(p.slug).toLowerCase(), p.id);
+            if (p.name) dbMap.set(String(p.name).toLowerCase(), p.id);
+          });
+
+          setMenuItems((prev) =>
+            prev.map((item) => {
+              const matchedId =
+                dbMap.get(item.id.toLowerCase()) ||
+                dbMap.get(item.name.toLowerCase());
+              return matchedId ? { ...item, id: String(matchedId) } : item;
+            })
+          );
+        }
+      } catch (err) {
+        console.warn('Notice loading products from Supabase:', err);
+      }
+    }
+
+    loadDbProducts();
+  }, []);
+
   const filteredProducts = activeCategory === 'all'
-    ? FULL_MENU_DATA
-    : FULL_MENU_DATA.filter((p) => p.category === activeCategory);
+    ? menuItems
+    : menuItems.filter((p) => p.category === activeCategory);
 
   return (
     <main className="overflow-hidden">

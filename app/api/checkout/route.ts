@@ -40,20 +40,28 @@ export async function POST(request: NextRequest) {
       request.headers.get('origin') ||
       'http://localhost:3000';
 
-    // Fast lookup map for authoritative menu items
-    const productCatalogMap = new Map(FULL_MENU_DATA.map((p) => [p.id, p]));
+    // Fast lookup map for authoritative menu items by id, slug, and name
+    const productCatalogMap = new Map<string, typeof FULL_MENU_DATA[0]>();
+    for (const p of FULL_MENU_DATA) {
+      productCatalogMap.set(p.id, p);
+      productCatalogMap.set(p.id.toLowerCase(), p);
+      productCatalogMap.set(p.name.toLowerCase(), p);
+    }
 
     // Format line items for Stripe using authoritative backend prices (in pence)
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     let calculatedSubtotal = 0;
 
     for (const item of items) {
-      const productId = String(item.product_id || item.product?.id || item.id || '');
-      const verifiedProduct = productCatalogMap.get(productId);
+      const rawId = String(item.product_id || item.product?.id || item.id || '').trim();
+      const verifiedProduct =
+        productCatalogMap.get(rawId) ||
+        productCatalogMap.get(rawId.toLowerCase()) ||
+        productCatalogMap.get(String(item.product_name || item.name || '').toLowerCase());
 
       if (!verifiedProduct) {
         return NextResponse.json(
-          { error: `Invalid product item in basket (ID: ${productId}).` },
+          { error: `Invalid product item in basket (ID: ${rawId}).` },
           { status: 400 }
         );
       }
@@ -66,7 +74,7 @@ export async function POST(request: NextRequest) {
         return sum + arr.reduce((vSum: number, val: { price?: number }) => vSum + Number(val.price || 0), 0);
       }, 0);
 
-      const effectiveUnitPrice = verifiedProduct.price + optionModifierSum;
+      const effectiveUnitPrice = Number(verifiedProduct.price || 0) + optionModifierSum;
       const itemTotal = effectiveUnitPrice * quantity;
       calculatedSubtotal += itemTotal;
 
@@ -145,11 +153,45 @@ export async function POST(request: NextRequest) {
           supabaseOrderId = orderData.id;
 
           // ---------------------------------------------------------------
-          // 2. SUPABASE: INSERT cart items into 'order_items' table
+          // 2. SUPABASE: Query products to resolve numerical bigint IDs
+          // ---------------------------------------------------------------
+          const slugToIdMap = new Map<string, number>();
+          try {
+            const { data: dbProducts } = await supabaseAdmin
+              .from('products')
+              .select('id, name, slug');
+
+            if (dbProducts && Array.isArray(dbProducts)) {
+              for (const p of dbProducts) {
+                if (p.id) {
+                  const numId = Number(p.id);
+                  if (!isNaN(numId)) {
+                    if (p.slug) slugToIdMap.set(String(p.slug).toLowerCase(), numId);
+                    if (p.name) slugToIdMap.set(String(p.name).toLowerCase(), numId);
+                    slugToIdMap.set(String(p.id), numId);
+                  }
+                }
+              }
+            }
+          } catch (fetchErr) {
+            console.warn('Notice querying products table in checkout:', fetchErr);
+          }
+
+          // ---------------------------------------------------------------
+          // 3. SUPABASE: INSERT cart items into 'order_items' table
           // ---------------------------------------------------------------
           const orderItemsPayload = items.map((item) => {
-            const productId = String(item.product_id || item.product?.id || item.id || '');
-            const verifiedProduct = productCatalogMap.get(productId)!;
+            const rawId = String(item.product_id || item.product?.id || item.id || '').trim();
+            const verifiedProduct =
+              productCatalogMap.get(rawId) ||
+              productCatalogMap.get(rawId.toLowerCase()) ||
+              productCatalogMap.get(String(item.product_name || item.name || '').toLowerCase()) || {
+                id: rawId,
+                name: item.product_name || item.name || 'Grilled Feast',
+                price: Number(item.unit_price || item.price || 0),
+                description: '',
+              };
+
             const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
 
             const optionModifierSum = Object.values(item.options || {}).reduce((sum: number, arr: unknown) => {
@@ -157,15 +199,28 @@ export async function POST(request: NextRequest) {
               return sum + arr.reduce((vSum: number, val: { price?: number }) => vSum + Number(val.price || 0), 0);
             }, 0);
 
-            const effectiveUnitPrice = verifiedProduct.price + optionModifierSum;
+            const effectiveUnitPrice = Number(verifiedProduct.price || 0) + optionModifierSum;
             const itemTotal = effectiveUnitPrice * quantity;
+
+            // Strictly resolve to numerical bigint or null to satisfy database column type
+            let resolvedBigIntId: number | null = null;
+            if (/^\d+$/.test(rawId)) {
+              resolvedBigIntId = Number(rawId);
+            } else {
+              resolvedBigIntId =
+                slugToIdMap.get(rawId.toLowerCase()) ||
+                slugToIdMap.get(verifiedProduct.name.toLowerCase()) ||
+                null;
+            }
 
             return {
               order_id: supabaseOrderId,
-              product_id: verifiedProduct.id,
+              product_id: resolvedBigIntId,
               product_name: verifiedProduct.name,
+              name: verifiedProduct.name,
               quantity,
               unit_price: verifiedProduct.price,
+              price: verifiedProduct.price,
               total: itemTotal,
               options:
                 item.options || {
@@ -209,6 +264,8 @@ export async function POST(request: NextRequest) {
         scheduledDate,
         scheduledTime,
         itemCount: String(items.length),
+        customerName,
+        customerEmail,
         customerPhone,
       },
     };

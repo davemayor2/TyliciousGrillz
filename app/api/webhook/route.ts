@@ -6,8 +6,8 @@ import { sendOrderNotifications } from '@/libs/email';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.STRIPE_SECRET_KEY;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const apiKey = process.env.STRIPE_SECRET_KEY?.trim().replace(/^["']|["']$/g, '');
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim().replace(/^["']|["']$/g, '');
 
   if (!apiKey) {
     return NextResponse.json(
@@ -16,8 +16,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const stripe = new Stripe(apiKey);
-  const signature = request.headers.get('stripe-signature');
+  const stripe = new Stripe(apiKey, {
+    apiVersion: '2025-02-24.acacia' as Stripe.LatestApiVersion,
+  });
+  const signature = request.headers.get('stripe-signature')?.trim();
 
   if (!signature) {
     return NextResponse.json(
@@ -35,14 +37,21 @@ export async function POST(request: NextRequest) {
   }
 
   let event: Stripe.Event;
+  let rawBody = '';
 
   try {
     // 1. Read raw body text to cryptographically verify Stripe signature
-    const rawBody = await request.text();
+    rawBody = await request.text();
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Signature verification failed';
-    console.error('⚠️ Stripe Webhook signature verification failed:', message);
+    console.error('⚠️ Stripe Webhook signature verification failed:', message, {
+      hasSecret: !!webhookSecret,
+      secretPrefix: webhookSecret ? webhookSecret.substring(0, 8) : 'none',
+      hasSignature: !!signature,
+      signaturePrefix: signature ? signature.substring(0, 15) : 'none',
+      bodyLength: rawBody.length,
+    });
     return NextResponse.json(
       { error: `Webhook Signature Error: ${message}` },
       { status: 400 }

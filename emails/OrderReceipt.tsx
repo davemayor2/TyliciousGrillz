@@ -17,10 +17,14 @@ import {
 export interface OrderItemData {
   id?: string | number;
   product_id?: string | number;
-  product_name: string;
+  product_name?: string;
+  name?: string;
+  item_name?: string;
+  title?: string;
   quantity: number;
-  unit_price: number;
-  total: number;
+  unit_price?: number;
+  price?: number;
+  total?: number;
   options?: unknown;
 }
 
@@ -53,10 +57,29 @@ export function extractItemOptions(options: unknown): { label: string; values: s
 
   let parsed = options;
   if (typeof parsed === 'string') {
+    const trimmed = parsed.trim();
+    // If it's a pipe/colon formatted string (e.g. from Stripe line items description)
+    if (trimmed.includes(':') || trimmed.includes('|')) {
+      const parts = trimmed.split('|').map((p) => p.trim()).filter(Boolean);
+      const stringResults: { label: string; values: string }[] = [];
+      for (const part of parts) {
+        const colonIdx = part.indexOf(':');
+        if (colonIdx > 0) {
+          stringResults.push({
+            label: part.substring(0, colonIdx).trim(),
+            values: part.substring(colonIdx + 1).trim(),
+          });
+        } else {
+          stringResults.push({ label: 'Option', values: part });
+        }
+      }
+      if (stringResults.length > 0) return stringResults;
+    }
+
     try {
-      parsed = JSON.parse(parsed);
+      parsed = JSON.parse(trimmed);
     } catch {
-      return [{ label: 'Option', values: String(parsed) }];
+      return [{ label: 'Option', values: trimmed }];
     }
   }
 
@@ -205,13 +228,21 @@ export const OrderReceipt: React.FC<OrderReceiptProps> = ({ order, order_items =
               ) : (
                 order_items.map((item, index) => {
                   const optionsList = extractItemOptions(item.options);
+                  const displayName = item.product_name || item.name || item.item_name || item.title || 'Flame-Grilled Item';
+                  const quantity = Math.max(1, Number(item.quantity) || 1);
+                  const effectiveUnitPrice = Number(
+                    item.unit_price ?? item.price ?? (item.total ? Number(item.total) / quantity : 0)
+                  );
+                  const effectiveTotal = Number(
+                    item.total ?? (effectiveUnitPrice * quantity)
+                  );
 
                   return (
                     <div key={index} style={itemCard}>
                       <Row>
                         <Column style={{ width: '75%' }}>
                           <Text style={itemName}>
-                            {item.quantity}× {item.product_name}
+                            {quantity}× {displayName}
                           </Text>
 
                           {/* Selected Side Options & Spice Level */}
@@ -226,10 +257,12 @@ export const OrderReceipt: React.FC<OrderReceiptProps> = ({ order, order_items =
                           )}
                         </Column>
                         <Column style={{ width: '25%', textAlign: 'right', verticalAlign: 'top' }}>
-                          <Text style={itemPrice}>£{Number(item.total).toFixed(2)}</Text>
-                          <Text style={unitPriceText}>
-                            (£{Number(item.unit_price).toFixed(2)} each)
-                          </Text>
+                          <Text style={itemPrice}>£{effectiveTotal.toFixed(2)}</Text>
+                          {effectiveUnitPrice > 0 && (
+                            <Text style={unitPriceText}>
+                              (£{effectiveUnitPrice.toFixed(2)} each)
+                            </Text>
+                          )}
                         </Column>
                       </Row>
                     </div>

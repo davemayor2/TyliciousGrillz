@@ -136,15 +136,17 @@ export const NewOrderAlert: React.FC<NewOrderAlertProps> = ({ order, order_items
               ) : (
                 order_items.map((item, index) => {
                   const optionsList = extractItemOptions(item.options);
+                  const displayName = item.product_name || item.name || item.item_name || item.title || 'Flame-Grilled Item';
+                  const quantity = Math.max(1, Number(item.quantity) || 1);
 
                   return (
                     <div key={index} style={kitchenItemBox}>
                       <Row>
                         <Column style={{ width: '15%', verticalAlign: 'top' }}>
-                          <Text style={kitchenQtyBadge}>{item.quantity}×</Text>
+                          <Text style={kitchenQtyBadge}>{quantity}×</Text>
                         </Column>
                         <Column style={{ width: '85%', verticalAlign: 'top' }}>
-                          <Text style={kitchenItemTitle}>{item.product_name}</Text>
+                          <Text style={kitchenItemTitle}>{displayName}</Text>
                           
                           {/* Item Customizations and Side Choices */}
                           {optionsList.length > 0 && (

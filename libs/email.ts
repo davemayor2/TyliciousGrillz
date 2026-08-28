@@ -1,14 +1,23 @@
 import React from 'react';
 import { Resend } from 'resend';
+import Stripe from 'stripe';
 import { render } from '@react-email/components';
 import { supabaseAdmin } from '@/libs/supabase/server';
 import { OrderReceipt, OrderData, OrderItemData } from '@/emails/OrderReceipt';
 import { NewOrderAlert } from '@/emails/NewOrderAlert';
 
 const apiKey = process.env.RESEND_API_KEY;
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 // Initialize Resend Client
 export const resend = new Resend(apiKey || 're_placeholder');
+
+// Initialize Stripe Client
+const stripe = stripeSecretKey
+  ? new Stripe(stripeSecretKey, {
+      apiVersion: '2025-02-24.acacia' as Stripe.LatestApiVersion,
+    })
+  : null;
 
 const DEFAULT_FROM =
   process.env.RESEND_FROM_EMAIL ||
@@ -33,74 +42,214 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
     let orderItems: OrderItemData[] = [];
 
     const targetStr = String(orderIdOrSessionId).trim();
+    let stripeSessionId: string | null = targetStr.startsWith('cs_') ? targetStr : null;
 
-    // 1. Fetch full order and associated order_items from Supabase
-    if (targetStr.startsWith('cs_')) {
-      // Lookup by Stripe session ID
-      const { data, error } = await supabaseAdmin
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('stripe_session_id', targetStr)
-        .maybeSingle();
+    // -----------------------------------------------------------------
+    // 1. SUPABASE LOOKUP: Fetch order row
+    // -----------------------------------------------------------------
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      try {
+        if (targetStr.startsWith('cs_')) {
+          // Lookup by Stripe session ID
+          const { data, error } = await supabaseAdmin
+            .from('orders')
+            .select('*')
+            .eq('stripe_session_id', targetStr)
+            .maybeSingle();
 
-      if (data) {
-        order = data as OrderData;
-        orderItems = (data.order_items || []) as OrderItemData[];
-      }
-      if (error) console.warn('⚠️ Supabase lookup by stripe_session_id:', error.message);
-    } else {
-      // Lookup by order primary key ID (integer or UUID)
-      const { data, error } = await supabaseAdmin
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('id', orderIdOrSessionId)
-        .maybeSingle();
+          if (data) {
+            order = data as OrderData;
+            stripeSessionId = targetStr;
+          }
+          if (error) console.warn('⚠️ Supabase lookup by stripe_session_id notice:', error.message);
+        } else {
+          // Lookup by order primary key ID (integer or UUID)
+          const { data, error } = await supabaseAdmin
+            .from('orders')
+            .select('*')
+            .eq('id', orderIdOrSessionId)
+            .maybeSingle();
 
-      if (data) {
-        order = data as OrderData;
-        orderItems = (data.order_items || []) as OrderItemData[];
-      } else {
-        // Fallback search by stripe_session_id in case a session ID without cs_ prefix was provided
-        const { data: fallbackData } = await supabaseAdmin
-          .from('orders')
-          .select('*, order_items(*)')
-          .eq('stripe_session_id', targetStr)
-          .maybeSingle();
+          if (data) {
+            order = data as OrderData;
+            if (data.stripe_session_id) {
+              stripeSessionId = data.stripe_session_id;
+            }
+          } else {
+            // Fallback search by stripe_session_id in case a string ID was provided
+            const { data: fallbackData } = await supabaseAdmin
+              .from('orders')
+              .select('*')
+              .eq('stripe_session_id', targetStr)
+              .maybeSingle();
 
-        if (fallbackData) {
-          order = fallbackData as OrderData;
-          orderItems = (fallbackData.order_items || []) as OrderItemData[];
+            if (fallbackData) {
+              order = fallbackData as OrderData;
+              if (fallbackData.stripe_session_id) {
+                stripeSessionId = fallbackData.stripe_session_id;
+              }
+            }
+          }
+          if (error) console.warn('⚠️ Supabase lookup by id notice:', error.message);
         }
+
+        // Fetch associated order_items if order exists in Supabase
+        if (order?.id) {
+          const { data: explicitItems, error: itemsError } = await supabaseAdmin
+            .from('order_items')
+            .select('*')
+            .eq('order_id', order.id);
+
+          if (explicitItems && explicitItems.length > 0) {
+            orderItems = explicitItems.map((it) => ({
+              id: it.id,
+              product_id: it.product_id,
+              product_name: it.product_name || it.name || it.item_name || 'Grilled Item',
+              quantity: Math.max(1, Number(it.quantity) || 1),
+              unit_price: Number(it.unit_price ?? it.price ?? 0),
+              total: Number(it.total ?? (Number(it.unit_price ?? it.price ?? 0) * (Number(it.quantity) || 1))),
+              options: it.options,
+            }));
+            console.log(`📦 Loaded ${orderItems.length} items from Supabase order_items table for Order #${order.id}`);
+          }
+          if (itemsError) {
+            console.warn('⚠️ Supabase order_items query notice:', itemsError.message);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('⚠️ Supabase database retrieval notice:', dbErr);
       }
-      if (error) console.warn('⚠️ Supabase lookup by id:', error.message);
+    }
+
+    // -----------------------------------------------------------------
+    // 2. STRIPE LINE ITEMS FALLBACK & ENHANCEMENT:
+    // If order_items are empty or order is missing from Supabase,
+    // load line items & metadata directly from Stripe Checkout Session
+    // -----------------------------------------------------------------
+    if (stripe && stripeSessionId) {
+      try {
+        const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
+
+        if (session) {
+          // If order wasn't in Supabase, synthesize OrderData from Stripe Session
+          if (!order) {
+            const isCollection = session.metadata?.fulfillment === 'Collection';
+            const deliveryFee = isCollection ? 0 : 5.00;
+            const grandTotal = (session.amount_total || 0) / 100;
+            const subtotal = Math.max(0, Number((grandTotal - deliveryFee).toFixed(2)));
+
+            order = {
+              id: session.metadata?.order_id || (session.id.startsWith('cs_') ? session.id.slice(-8).toUpperCase() : session.id),
+              customer_name: session.customer_details?.name || session.metadata?.customerName || 'Customer',
+              customer_email: session.customer_details?.email || session.customer_email || null,
+              customer_phone: session.customer_details?.phone || session.metadata?.customerPhone || null,
+              delivery_address: session.metadata?.deliveryAddress || (session.metadata?.postcode ? `Postcode: ${session.metadata.postcode}` : null),
+              fulfillment_method: session.metadata?.fulfillment || 'Delivery',
+              subtotal: subtotal,
+              delivery_fee: deliveryFee,
+              total: grandTotal,
+              payment_status: session.payment_status || 'paid',
+              order_status: 'confirmed',
+              created_at: new Date(session.created * 1000).toISOString(),
+              stripe_session_id: session.id,
+            };
+          } else {
+            // Ensure customer details from Stripe are filled in if missing in Supabase
+            if (!order.customer_email && (session.customer_details?.email || session.customer_email)) {
+              order.customer_email = session.customer_details?.email || session.customer_email;
+            }
+            if (!order.customer_name && (session.customer_details?.name || session.metadata?.customerName)) {
+              order.customer_name = session.customer_details?.name || session.metadata?.customerName;
+            }
+            if (!order.customer_phone && (session.customer_details?.phone || session.metadata?.customerPhone)) {
+              order.customer_phone = session.customer_details?.phone || session.metadata?.customerPhone;
+            }
+          }
+
+          // Fetch Stripe line items if orderItems is empty
+          if (orderItems.length === 0) {
+            const lineItems = await stripe.checkout.sessions.listLineItems(stripeSessionId, {
+              limit: 100,
+              expand: ['data.price.product'],
+            });
+
+            if (lineItems && lineItems.data && lineItems.data.length > 0) {
+              const stripeExtractedItems: OrderItemData[] = [];
+
+              for (const li of lineItems.data) {
+                const productObj = (typeof li.price?.product === 'object' && li.price?.product !== null)
+                  ? (li.price.product as Stripe.Product)
+                  : null;
+
+                const rawName = li.description || productObj?.name || 'Flame-Grilled Item';
+
+                // Exclude delivery line items from food items list
+                if (rawName.toLowerCase().includes('delivery')) {
+                  continue;
+                }
+
+                const quantity = Math.max(1, Number(li.quantity) || 1);
+                const unitAmountInPence = li.price?.unit_amount || Math.round((li.amount_total || 0) / quantity);
+                const unitPrice = unitAmountInPence / 100;
+                const total = (li.amount_total || 0) / 100;
+
+                // Extract custom options from Stripe description (e.g. "Spice Level: Extra Hot | Sides: Jollof Rice")
+                const optString = productObj?.description || (li.description && li.description !== rawName ? li.description : '');
+
+                stripeExtractedItems.push({
+                  id: li.id,
+                  product_id: productObj?.id || li.id,
+                  product_name: rawName,
+                  quantity,
+                  unit_price: unitPrice,
+                  total,
+                  options: optString || undefined,
+                });
+              }
+
+              if (stripeExtractedItems.length > 0) {
+                orderItems = stripeExtractedItems;
+                console.log(`📦 Loaded ${orderItems.length} items from Stripe line items for Order #${order.id}`);
+
+                // Backfill into Supabase order_items table if order exists
+                if (order.id && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+                  try {
+                    await supabaseAdmin.from('order_items').insert(
+                      orderItems.map((item) => ({
+                        order_id: order!.id,
+                        product_name: item.product_name,
+                        name: item.product_name,
+                        quantity: item.quantity,
+                        unit_price: item.unit_price,
+                        price: item.unit_price,
+                        total: item.total,
+                        options: item.options ? { 'Details': item.options } : null,
+                      }))
+                    );
+                    console.log(`✅ Backfilled ${orderItems.length} order items into Supabase.`);
+                  } catch (backfillErr) {
+                    console.warn('⚠️ Order items backfill notice:', backfillErr);
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (stripeErr) {
+        console.warn('⚠️ Stripe session line items lookup notice:', stripeErr);
+      }
     }
 
     if (!order) {
-      console.error('❌ Could not find order in Supabase for email notifications. ID:', orderIdOrSessionId);
-      return { success: false, error: 'Order not found in database' };
+      console.error('❌ Could not resolve order details for email notifications. ID:', orderIdOrSessionId);
+      return { success: false, error: 'Order not found' };
     }
 
     const orderData = order as OrderData;
 
-    // 2. Ensure order_items are loaded even if nested join is empty
-    if (!orderItems || orderItems.length === 0) {
-      const { data: explicitItems, error: itemsError } = await supabaseAdmin
-        .from('order_items')
-        .select('*')
-        .eq('order_id', orderData.id);
+    console.log(`📧 Pre-rendering HTML templates for Order #${orderData.id} (${orderItems.length} items: ${orderItems.map(i => i.product_name).join(', ') || 'None'}, Total: £${orderData.total})...`);
 
-      if (explicitItems && explicitItems.length > 0) {
-        orderItems = explicitItems as OrderItemData[];
-        console.log(`📦 Loaded ${orderItems.length} explicit order_items from order_items table for Order #${orderData.id}`);
-      }
-      if (itemsError) {
-        console.warn('⚠️ Explicit order_items query notice:', itemsError.message);
-      }
-    }
-
-    console.log(`📧 Pre-rendering HTML templates for Order #${orderData.id} (${orderItems.length} items, Total: £${orderData.total})...`);
-
-    // 2. Pre-render React Email templates to static HTML strings
+    // 3. Pre-render React Email templates to static HTML strings
     const receiptHtml = await render(
       React.createElement(OrderReceipt, {
         order: orderData,
@@ -117,7 +266,7 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
 
     const results: { customer?: unknown; staff?: unknown } = {};
 
-    // 3. Send Customer Order Receipt
+    // 4. Send Customer Order Receipt
     if (orderData.customer_email && orderData.customer_email.includes('@')) {
       try {
         const custRes = await resend.emails.send({
@@ -142,7 +291,7 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
       console.warn('⚠️ Order has no customer_email:', orderData);
     }
 
-    // 4. Send Restaurant Staff New Order Alert
+    // 5. Send Restaurant Staff New Order Alert
     try {
       const staffRes = await resend.emails.send({
         from: DEFAULT_FROM,
@@ -163,7 +312,7 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
       results.staff = { error: staffErr };
     }
 
-    return { success: true, orderId: orderData.id, results };
+    return { success: true, orderId: orderData.id, itemCount: orderItems.length, results };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown email error';
     console.error('❌ Failed to process order notification emails:', msg);
