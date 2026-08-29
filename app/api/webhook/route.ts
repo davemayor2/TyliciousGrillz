@@ -5,6 +5,22 @@ import { sendOrderNotifications } from '@/libs/email';
 
 export const dynamic = 'force-dynamic';
 
+function formatStripeAddress(address: Stripe.Address | null | undefined): string | null {
+  if (!address) return null;
+  const parts = [
+    address.line1,
+    address.line2,
+    address.city,
+    address.state,
+    address.postal_code,
+    address.country,
+  ]
+    .map((p) => p?.trim())
+    .filter(Boolean);
+
+  return parts.length > 0 ? parts.join(', ') : null;
+}
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.STRIPE_SECRET_KEY?.trim().replace(/^["']|["']$/g, '');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim().replace(/^["']|["']$/g, '');
@@ -70,12 +86,19 @@ export async function POST(request: NextRequest) {
         const customerEmail = session.customer_details?.email || session.customer_email;
         const customerName = session.customer_details?.name;
         const customerPhone = session.customer_details?.phone || metadata.customerPhone;
+        const customerAddress =
+          formatStripeAddress(session.customer_details?.address) ||
+          formatStripeAddress((session as unknown as { shipping_details?: { address?: Stripe.Address } }).shipping_details?.address) ||
+          metadata.deliveryAddress ||
+          (metadata.postcode ? `Postcode: ${metadata.postcode}` : null);
 
         console.log('🎉 [Webhook] Checkout Session Completed:', {
           stripeSessionId,
           supabaseOrderId,
           customerName,
           customerEmail,
+          customerPhone,
+          customerAddress,
           paymentStatus: session.payment_status,
         });
 
@@ -90,6 +113,7 @@ export async function POST(request: NextRequest) {
             if (customerName) updatePayload.customer_name = customerName;
             if (customerEmail) updatePayload.customer_email = customerEmail;
             if (customerPhone) updatePayload.customer_phone = customerPhone;
+            if (customerAddress) updatePayload.delivery_address = customerAddress;
 
             let query = supabaseAdmin.from('orders').update(updatePayload);
 

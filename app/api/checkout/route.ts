@@ -254,6 +254,13 @@ export async function POST(request: NextRequest) {
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       line_items,
+      phone_number_collection: {
+        enabled: true,
+      },
+      shipping_address_collection: {
+        allowed_countries: ['GB'],
+      },
+      billing_address_collection: 'required',
       success_url: `${baseUrl}/order-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/menu?canceled=true`,
       metadata: {

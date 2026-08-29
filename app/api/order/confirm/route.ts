@@ -35,11 +35,20 @@ export async function POST(request: NextRequest) {
     const customerEmail = session.customer_details?.email || session.customer_email;
     const customerName = session.customer_details?.name;
     const customerPhone = session.customer_details?.phone || session.metadata?.customerPhone;
+    const addressObj = session.customer_details?.address || (session as unknown as { shipping_details?: { address?: Stripe.Address } }).shipping_details?.address;
+    const customerAddress = addressObj
+      ? [addressObj.line1, addressObj.line2, addressObj.city, addressObj.state, addressObj.postal_code, addressObj.country]
+          .map((p) => p?.trim())
+          .filter(Boolean)
+          .join(', ')
+      : session.metadata?.deliveryAddress || (session.metadata?.postcode ? `Postcode: ${session.metadata.postcode}` : null);
 
     console.log('⚡ [Order Confirm Fail-Safe] Verifying paid session:', {
       sessionId,
       supabaseOrderId,
       customerEmail,
+      customerPhone,
+      customerAddress,
     });
 
     // 2. Update Supabase order status if not already paid
@@ -54,6 +63,7 @@ export async function POST(request: NextRequest) {
         if (customerName) updatePayload.customer_name = customerName;
         if (customerEmail) updatePayload.customer_email = customerEmail;
         if (customerPhone) updatePayload.customer_phone = customerPhone;
+        if (customerAddress) updatePayload.delivery_address = customerAddress;
 
         let query = supabaseAdmin.from('orders').update(updatePayload);
 

@@ -138,12 +138,20 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
             const grandTotal = (session.amount_total || 0) / 100;
             const subtotal = Math.max(0, Number((grandTotal - deliveryFee).toFixed(2)));
 
+            const addressObj = session.customer_details?.address || (session as unknown as { shipping_details?: { address?: Stripe.Address } }).shipping_details?.address;
+            const stripeAddress = addressObj
+              ? [addressObj.line1, addressObj.line2, addressObj.city, addressObj.state, addressObj.postal_code, addressObj.country]
+                  .map((p) => p?.trim())
+                  .filter(Boolean)
+                  .join(', ')
+              : session.metadata?.deliveryAddress || (session.metadata?.postcode ? `Postcode: ${session.metadata.postcode}` : null);
+
             order = {
               id: session.metadata?.order_id || (session.id.startsWith('cs_') ? session.id.slice(-8).toUpperCase() : session.id),
               customer_name: session.customer_details?.name || session.metadata?.customerName || 'Customer',
               customer_email: session.customer_details?.email || session.customer_email || null,
               customer_phone: session.customer_details?.phone || session.metadata?.customerPhone || null,
-              delivery_address: session.metadata?.deliveryAddress || (session.metadata?.postcode ? `Postcode: ${session.metadata.postcode}` : null),
+              delivery_address: stripeAddress,
               fulfillment_method: session.metadata?.fulfillment || 'Delivery',
               subtotal: subtotal,
               delivery_fee: deliveryFee,
@@ -163,6 +171,16 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
             }
             if (!order.customer_phone && (session.customer_details?.phone || session.metadata?.customerPhone)) {
               order.customer_phone = session.customer_details?.phone || session.metadata?.customerPhone;
+            }
+            if (!order.delivery_address) {
+              const addressObj = session.customer_details?.address || (session as unknown as { shipping_details?: { address?: Stripe.Address } }).shipping_details?.address;
+              if (addressObj) {
+                const stripeAddress = [addressObj.line1, addressObj.line2, addressObj.city, addressObj.state, addressObj.postal_code, addressObj.country]
+                  .map((p) => p?.trim())
+                  .filter(Boolean)
+                  .join(', ');
+                if (stripeAddress) order.delivery_address = stripeAddress;
+              }
             }
           }
 
