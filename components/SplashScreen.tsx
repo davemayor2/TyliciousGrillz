@@ -17,7 +17,7 @@ export default function SplashScreen({
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
+  const [shouldRender, setShouldRender] = useState(true);
 
   useEffect(() => {
     // Check if user has already seen splash screen in this session
@@ -33,7 +33,6 @@ export default function SplashScreen({
       // Fallback for private browsing or storage disabled
     }
 
-    setShouldRender(true);
     // Lock scrolling while splash screen is active
     document.body.style.overflow = 'hidden';
 
@@ -94,15 +93,15 @@ export default function SplashScreen({
   return (
     <div
       aria-hidden={!isVisible}
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white transition-opacity duration-500 ease-in-out ${
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white transition-opacity duration-500 ease-in-out ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
       }`}
     >
       <div className="flex flex-col items-center justify-center px-6">
-        {/* Brand Mascot & Logo Artwork */}
+        {/* Brand Mascot & Logo Artwork in WebP */}
         <div className="relative w-[260px] sm:w-[320px] md:w-[380px] lg:w-[420px] max-w-[85vw] aspect-square flex items-center justify-center select-none animate-splash-pop">
           <Image
-            src="/images/logo2.png"
+            src="/images/logo2.webp"
             alt="Tylicious Grillz Logo"
             width={420}
             height={420}
