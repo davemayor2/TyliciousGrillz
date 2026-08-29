@@ -5,32 +5,33 @@ import Image from 'next/image';
 
 interface SplashScreenProps {
   onComplete?: () => void;
-  minDuration?: number; // duration in ms, default 1400
+  minDuration?: number; // duration in ms, default 2000 (2s)
 }
 
-const STORAGE_KEY = 'tylicious_has_seen_splash';
+// In-memory runtime state that stays true across client-side router navigations
+// but resets to false on full browser refresh (F5 / reload) or initial URL entry.
+let hasShownSplashInAppLifetime = false;
+
+export function hasSeenSplash(): boolean {
+  return hasShownSplashInAppLifetime;
+}
 
 export default function SplashScreen({
   onComplete,
-  minDuration = 1400,
+  minDuration = 2000,
 }: SplashScreenProps) {
   const [progress, setProgress] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(!hasShownSplashInAppLifetime);
   const [isFadingOut, setIsFadingOut] = useState(false);
-  const [shouldRender, setShouldRender] = useState(true);
+  const [shouldRender, setShouldRender] = useState(!hasShownSplashInAppLifetime);
 
   useEffect(() => {
-    // Check if user has already seen splash screen in this session
-    try {
-      const hasSeen = sessionStorage.getItem(STORAGE_KEY);
-      if (hasSeen === 'true') {
-        setIsVisible(false);
-        setShouldRender(false);
-        onComplete?.();
-        return;
-      }
-    } catch {
-      // Fallback for private browsing or storage disabled
+    // If splash has already been shown during this SPA session, skip immediately
+    if (hasShownSplashInAppLifetime) {
+      setIsVisible(false);
+      setShouldRender(false);
+      onComplete?.();
+      return;
     }
 
     // Lock scrolling while splash screen is active
@@ -42,41 +43,38 @@ export default function SplashScreen({
     const updateProgress = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const rawProgress = Math.min(elapsed / minDuration, 1);
-      
-      // Smooth cubic ease-out curve for natural loading feel
-      const easedProgress = 1 - Math.pow(1 - rawProgress, 3);
-      const percentage = Math.round(easedProgress * 100);
 
+      // Smooth custom ease-in-out curve for a natural 2-second progression
+      const easedProgress =
+        rawProgress < 0.5
+          ? 2 * rawProgress * rawProgress
+          : 1 - Math.pow(-2 * rawProgress + 2, 2) / 2;
+
+      const percentage = Math.min(100, Math.round(easedProgress * 100));
       setProgress(percentage);
 
       if (rawProgress < 1) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
-        // Complete progress
         setProgress(100);
 
-        // Small settle buffer before fade out
+        // Settle buffer after reaching 100%
         setTimeout(() => {
           setIsFadingOut(true);
+          hasShownSplashInAppLifetime = true;
 
-          try {
-            sessionStorage.setItem(STORAGE_KEY, 'true');
-          } catch {
-            // Storage fail-safe
-          }
-
-          // Trigger onComplete slightly before full unmount for seamless hero animation overlap
+          // Seamless trigger to allow hero section to start animating as splash fades out
           setTimeout(() => {
             onComplete?.();
           }, 150);
 
-          // Full fade transition duration is 500ms
+          // After fade transition (500ms), unlock scroll and unmount
           setTimeout(() => {
             setIsVisible(false);
             setShouldRender(false);
             document.body.style.overflow = '';
           }, 500);
-        }, 150);
+        }, 200);
       }
     };
 
@@ -116,7 +114,7 @@ export default function SplashScreen({
           <div className="w-[240px] sm:w-[280px] md:w-[320px] h-[4px] bg-gray-200 rounded-full overflow-hidden relative shadow-inner">
             {/* Animated Bar Fill */}
             <div
-              className="h-full bg-[#E63900] rounded-full transition-all duration-100 ease-out shadow-[0_0_10px_rgba(230,57,0,0.6)]"
+              className="h-full bg-[#E63900] rounded-full transition-all duration-75 ease-out shadow-[0_0_10px_rgba(230,57,0,0.6)]"
               style={{ width: `${progress}%` }}
             />
           </div>

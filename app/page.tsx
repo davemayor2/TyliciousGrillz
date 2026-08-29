@@ -11,10 +11,10 @@ import Ordering from '@/components/sections/home/Ordering';
 import Testimonials from '@/components/sections/home/Testimonials';
 import Gallery from '@/components/sections/home/Gallery';
 import CTA from '@/components/sections/home/CTA';
-import SplashScreen from '@/components/SplashScreen';
+import SplashScreen, { hasSeenSplash } from '@/components/SplashScreen';
 
 export default function Home() {
-  const [splashFinished, setSplashFinished] = useState(false);
+  const [splashFinished, setSplashFinished] = useState(hasSeenSplash);
 
   return (
     <>
