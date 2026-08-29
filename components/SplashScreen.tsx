@@ -1,0 +1,148 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+
+interface SplashScreenProps {
+  onComplete?: () => void;
+  minDuration?: number; // duration in ms, default 1400
+}
+
+const STORAGE_KEY = 'tylicious_has_seen_splash';
+
+export default function SplashScreen({
+  onComplete,
+  minDuration = 1400,
+}: SplashScreenProps) {
+  const [progress, setProgress] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    // Check if user has already seen splash screen in this session
+    try {
+      const hasSeen = sessionStorage.getItem(STORAGE_KEY);
+      if (hasSeen === 'true') {
+        setIsVisible(false);
+        setShouldRender(false);
+        onComplete?.();
+        return;
+      }
+    } catch {
+      // Fallback for private browsing or storage disabled
+    }
+
+    setShouldRender(true);
+    // Lock scrolling while splash screen is active
+    document.body.style.overflow = 'hidden';
+
+    const startTime = performance.now();
+    let animationFrameId: number;
+
+    const updateProgress = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const rawProgress = Math.min(elapsed / minDuration, 1);
+      
+      // Smooth cubic ease-out curve for natural loading feel
+      const easedProgress = 1 - Math.pow(1 - rawProgress, 3);
+      const percentage = Math.round(easedProgress * 100);
+
+      setProgress(percentage);
+
+      if (rawProgress < 1) {
+        animationFrameId = requestAnimationFrame(updateProgress);
+      } else {
+        // Complete progress
+        setProgress(100);
+
+        // Small settle buffer before fade out
+        setTimeout(() => {
+          setIsFadingOut(true);
+
+          try {
+            sessionStorage.setItem(STORAGE_KEY, 'true');
+          } catch {
+            // Storage fail-safe
+          }
+
+          // Trigger onComplete slightly before full unmount for seamless hero animation overlap
+          setTimeout(() => {
+            onComplete?.();
+          }, 150);
+
+          // Full fade transition duration is 500ms
+          setTimeout(() => {
+            setIsVisible(false);
+            setShouldRender(false);
+            document.body.style.overflow = '';
+          }, 500);
+        }, 150);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateProgress);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      document.body.style.overflow = '';
+    };
+  }, [minDuration, onComplete]);
+
+  if (!shouldRender || !isVisible) return null;
+
+  return (
+    <div
+      aria-hidden={!isVisible}
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white transition-opacity duration-500 ease-in-out ${
+        isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'
+      }`}
+    >
+      <div className="flex flex-col items-center justify-center px-6">
+        {/* Brand Mascot & Logo Artwork */}
+        <div className="relative w-[260px] sm:w-[320px] md:w-[380px] lg:w-[420px] max-w-[85vw] aspect-square flex items-center justify-center select-none animate-splash-pop">
+          <Image
+            src="/images/logo2.png"
+            alt="Tylicious Grillz Logo"
+            width={420}
+            height={420}
+            priority
+            className="object-contain w-full h-full drop-shadow-sm"
+          />
+        </div>
+
+        {/* Horizontal Progress Bar Container */}
+        <div className="mt-8 sm:mt-10 md:mt-12 flex flex-col items-center">
+          {/* Progress Bar Track */}
+          <div className="w-[240px] sm:w-[280px] md:w-[320px] h-[4px] bg-gray-200 rounded-full overflow-hidden relative shadow-inner">
+            {/* Animated Bar Fill */}
+            <div
+              className="h-full bg-[#E63900] rounded-full transition-all duration-100 ease-out shadow-[0_0_10px_rgba(230,57,0,0.6)]"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes splashPop {
+          0% {
+            transform: scale(0.92);
+            opacity: 0;
+          }
+          60% {
+            transform: scale(1.02);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        .animate-splash-pop {
+          animation: splashPop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+    </div>
+  );
+}

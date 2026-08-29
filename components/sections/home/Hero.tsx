@@ -6,7 +6,11 @@ import Link from 'next/link';
 import gsap from '@/libs/gsap';
 import Container from '../../shared/Container';
 
-export default function Hero() {
+interface HeroProps {
+  splashFinished?: boolean;
+}
+
+export default function Hero({ splashFinished = true }: HeroProps) {
   const contentRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
@@ -18,18 +22,24 @@ export default function Hero() {
   const secondaryTextRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    if (!splashFinished) {
+      // Keep items hidden while splash is actively running
+      gsap.set('.animate-hero-item', { y: 30, opacity: 0 });
+      return;
+    }
+
     // Zoom effect on background and elegant staggered reveal
     const ctx = gsap.context(() => {
       gsap.fromTo(
         bgRef.current,
         { scale: 1.08 },
-        { scale: 1, duration: 2, ease: 'power2.out' }
+        { scale: 1, duration: 1.8, ease: 'power2.out' }
       );
 
       gsap.fromTo(
         '.animate-hero-item',
         { y: 30, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power3.out', delay: 0.2 }
+        { y: 0, opacity: 1, duration: 0.8, stagger: 0.12, ease: 'power3.out', delay: 0.1 }
       );
 
       // Initialize secondary button fill layer as a circle scaled to 0
@@ -42,7 +52,7 @@ export default function Hero() {
     }, contentRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [splashFinished]);
 
   // Primary Button Hover Handlers
   const handleMouseEnter = () => {

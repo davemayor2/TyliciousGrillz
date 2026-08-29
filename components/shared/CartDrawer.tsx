@@ -307,17 +307,30 @@ export default function CartDrawer() {
                     {/* Circular +/- Controls */}
                     <div className="flex items-center gap-2 shrink-0">
                       <button
-                        onClick={() => updateQuantity(item.cart_item_id, item.quantity - 1)}
-                        className="w-8 h-8 rounded-full bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] flex items-center justify-center font-bold hover:bg-[#ffdad2] transition-colors cursor-pointer"
+                        type="button"
+                        disabled={item.quantity <= 1}
+                        onClick={() => {
+                          if (item.quantity > 1) {
+                            updateQuantity(item.cart_item_id, item.quantity - 1);
+                          }
+                        }}
+                        aria-label="Decrease quantity"
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all ${
+                          item.quantity <= 1
+                            ? 'bg-gray-100 border border-gray-300 text-gray-300 cursor-not-allowed opacity-50'
+                            : 'bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] hover:bg-[#ffdad2] active:scale-95 cursor-pointer'
+                        }`}
                       >
                         <Minus className="w-4.5 h-4.5 stroke-[3]" />
                       </button>
-                      <span className="font-sans font-bold text-sm text-[#1A0500] w-4 text-center">
+                      <span className="font-sans font-bold text-sm text-[#1A0500] w-4 text-center select-none">
                         {item.quantity}
                       </span>
                       <button
+                        type="button"
                         onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
-                        className="w-8 h-8 rounded-full bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] flex items-center justify-center font-bold hover:bg-[#ffdad2] transition-colors cursor-pointer"
+                        aria-label="Increase quantity"
+                        className="w-8 h-8 rounded-full bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] flex items-center justify-center font-bold hover:bg-[#ffdad2] active:scale-95 transition-all cursor-pointer"
                       >
                         <Plus className="w-4.5 h-4.5 stroke-[3]" />
                       </button>

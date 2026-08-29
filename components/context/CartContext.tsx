@@ -255,23 +255,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Update Quantity
+  // Update Quantity (caps minimum at 1; removal only permitted via trash icon)
   const updateQuantity = useCallback((cart_item_id: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      removeItem(cart_item_id);
+    if (newQuantity < 1) {
       return;
     }
 
     setItems((prevItems) => {
       const updated = prevItems.map((item) => {
         if (item.cart_item_id === cart_item_id) {
+          const validQuantity = Math.max(1, Math.floor(newQuantity));
           const optionModifierSum = Object.values(item.options || {}).reduce((s, arr) => {
             return s + (Array.isArray(arr) ? arr.reduce((vS, val) => vS + Number(val.price || 0), 0) : 0);
           }, 0);
-          const newTotal = Number((newQuantity * (item.unit_price + optionModifierSum)).toFixed(2));
+          const newTotal = Number((validQuantity * (item.unit_price + optionModifierSum)).toFixed(2));
           return {
             ...item,
-            quantity: newQuantity,
+            quantity: validQuantity,
             total: newTotal,
           };
         }
@@ -285,7 +285,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return updated;
     });
-  }, [removeItem]);
+  }, []);
 
   // Clear Cart
   const clearCart = useCallback(() => {

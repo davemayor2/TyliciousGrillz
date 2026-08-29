@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import Hero from '@/components/sections/home/Hero';
@@ -9,13 +11,17 @@ import Ordering from '@/components/sections/home/Ordering';
 import Testimonials from '@/components/sections/home/Testimonials';
 import Gallery from '@/components/sections/home/Gallery';
 import CTA from '@/components/sections/home/CTA';
+import SplashScreen from '@/components/SplashScreen';
 
 export default function Home() {
+  const [splashFinished, setSplashFinished] = useState(false);
+
   return (
     <>
+      <SplashScreen onComplete={() => setSplashFinished(true)} />
       <Navbar />
       <main className="overflow-hidden">
-        <Hero />
+        <Hero splashFinished={splashFinished} />
         <CateringHighlight />
         <WhyLoveUs />
         {/* <HomeCategories /> */}
