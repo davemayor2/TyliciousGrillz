@@ -83,7 +83,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     image: '/images/Frame 153.png',
     category: 'chicken-turkey',
     popular: true,
-    video: '/vids/chicken_wings.mp4',
+    video: '/vids/bbq_chicken.mp4',
   },
   {
     id: 'chicken-thigh',
@@ -102,7 +102,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     image: '/images/Frame 153.png',
     category: 'chicken-turkey',
     spicy: true,
-    video: '/vids/chicken_wings.mp4',
+    video: '/vids/chicken_wings_2.mp4',
   },
   {
     id: 'grilled-turkey',
@@ -133,7 +133,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     image: '/images/rs=w_1536.webp',
     category: 'lamb-beef',
     popular: true,
-    video: '/vids/lamb_chops_ribs.mp4',
+    video: '/vids/mixed_grill.mp4',
   },
   {
     id: 'suya',

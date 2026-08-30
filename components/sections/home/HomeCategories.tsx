@@ -27,7 +27,7 @@ export default function HomeCategories() {
       id: 'lamb-beef',
       icon: '🍖',
       title: 'Lamb & Beef',
-      image: '/images/rs=w_1536.webp',
+      image: '/images/lamb&beef.webp',
       description: 'Premium Lamb Chops, glazed baby back ribs, and authentic spicy Nigerian beef Suya.',
     },
     {

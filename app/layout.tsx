@@ -49,7 +49,7 @@ export default function RootLayout({
               "name": "Tylicious Grillz",
               "image": "https://tyliciousgrillz.com/images/Gemini_Generated_Image_cibfydcibfydcibf.png",
               "url": "https://tyliciousgrillz.com",
-              "telephone": "+441234567890",
+              "telephone": "+447597934557",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "London & Kent Service Area",

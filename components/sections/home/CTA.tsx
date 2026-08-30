@@ -12,7 +12,7 @@ export default function CTA() {
   const hoverTlRef = useRef<gsap.core.Timeline | null>(null);
 
   const handleWhatsAppRedirect = () => {
-    window.open('https://wa.me/2348123456789?text=Hello%20Tylicious%20Grillz,%20I%20would%20like%20to%20place%20an%20order!', '_blank');
+    window.open('https://wa.me/447597934557?text=Hello%20Tylicious%20Grillz,%20I%20would%20like%20to%20place%20an%20order!', '_blank');
   };
 
   const handleMouseEnter = () => {

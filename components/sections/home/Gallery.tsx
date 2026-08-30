@@ -29,9 +29,9 @@ export default function Gallery() {
 
         {/* Asymmetrical Bento-Box Image Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          
+
           {/* ================= TOP ROW ================= */}
-          
+
           {/* 1. Top-Left Card (Wide Hero Image) - Spans 2 Columns */}
           <AnimatedSection direction="left" className="md:col-span-2 relative group overflow-hidden rounded-[24px] aspect-[16/10] md:aspect-[2.1/1] border border-brand-orange/5 shadow-sm bg-white cursor-pointer">
             <Image
@@ -101,7 +101,7 @@ export default function Gallery() {
                 />
               </div>
             </div>
-            
+
             {/* Logo Overlay anchored at bottom-center/left intersection of the mini-tiles */}
             <div className="absolute bottom-4 left-4 z-20 bg-brand-orange text-white text-[11px] font-judson font-bold px-3 py-1 rounded-full border border-white/20 shadow-md select-none transition-transform duration-300 group-hover:scale-105">
               Tylicious Grillz
@@ -119,7 +119,7 @@ export default function Gallery() {
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-            
+
             {/* Flame Logo Overlay at bottom-center edge */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-brand-orange text-white flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/20 shadow-md text-[11px] font-sans font-semibold select-none transition-transform duration-300 group-hover:scale-105">
               <span>🔥</span>
@@ -138,7 +138,7 @@ export default function Gallery() {
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-            
+
             {/* Illustrated Mascot/Badge Logo in bottom-left corner */}
             <div className="absolute bottom-4 left-4 z-20 bg-black/85 backdrop-blur-sm text-white flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-white/10 shadow-md text-[10px] font-sans font-bold uppercase tracking-wider select-none transition-transform duration-300 group-hover:scale-105">
               <div className="relative w-4 h-4 rounded-full overflow-hidden bg-white shrink-0">

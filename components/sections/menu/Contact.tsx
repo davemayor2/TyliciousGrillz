@@ -9,7 +9,7 @@ import AnimatedSection from '../../shared/AnimatedSection';
 
 export default function Contact() {
   const handleWhatsAppRedirect = () => {
-    window.open('https://wa.me/2348123456789?text=Hello%20Tylicious%20Grillz,%20I%20would%20like%20to%20inquire%20about%20a%20bulk%20order%20for%20an%20event.', '_blank');
+    window.open('https://wa.me/447597934557?text=Hello%20Tylicious%20Grillz,%20I%20would%20like%20to%20inquire%20about%20a%20bulk%20order%20for%20an%20event.', '_blank');
   };
 
   return (

@@ -107,7 +107,7 @@ export default function Ordering() {
               </div>
 
               {/* Social Proof Card (2K+ Served Customers) with Neo-Brutalist 3D Shadow */}
-              <div className="inline-flex items-center bg-[#E63900] border-2 border-[#1A0500] rounded-2xl p-4 pr-6 gap-4 shadow-[6px_6px_0px_#1A0500] backdrop-blur-sm">
+              <div className="inline-flex items-center bg-[#FD9F02] border-2 border-[#1A0500] rounded-2xl p-4 pr-6 gap-4 shadow-[6px_6px_0px_#1A0500] backdrop-blur-sm">
                 {/* Avatar Stack */}
                 <div className="flex pl-2.5">
                   {[1, 2, 3].map((num) => (
