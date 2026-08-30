@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Judson, Instrument_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { CartProvider } from "@/components/context/CartContext";
 import CookieBanner from "@/components/shared/CookieBanner";
 import MobileStickyCart from "@/components/shared/MobileStickyCart";
@@ -112,6 +113,7 @@ export default function RootLayout({
           <MobileStickyCart />
           <WhatsAppWidget />
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );
