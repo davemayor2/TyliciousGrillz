@@ -25,7 +25,7 @@ export default function Categories({ activeCategory, onSelectCategory }: Categor
     {
       id: 'lamb-beef',
       label: 'Lamb &\nBeef',
-      image: '/images/rs=w_1536.webp',
+      image: '/images/lamb&beef.webp',
     },
     {
       id: 'seafood',
