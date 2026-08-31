@@ -123,7 +123,6 @@ export default function CateringPage() {
     'Spicy Chicken Skewers',
     'Sweet Potato Fries',
     'Charcoal Grilled Sweetcorn',
-    'Tylicious Chapman Cocktail',
   ];
 
   return (

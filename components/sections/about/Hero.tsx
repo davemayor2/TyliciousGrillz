@@ -17,7 +17,7 @@ export default function Hero() {
         { scale: 1.08 },
         { scale: 1, duration: 1.8, ease: 'power2.out' }
       );
-      
+
       // Staggered reveal for text content
       gsap.fromTo(
         '.animate-about-hero',
@@ -34,7 +34,7 @@ export default function Hero() {
       {/* Background Image: Chef grilling fish framed by fresh ingredients */}
       <div ref={bgRef} className="absolute inset-0 z-0">
         <Image
-          src="/images/about us (2).png"
+          src="/images/about_page.webp"
           alt="Chef grilling fish over open flames, framed by fresh vegetables"
           fill
           priority
@@ -48,7 +48,7 @@ export default function Hero() {
       <Container className="relative z-20 text-center flex flex-col items-center">
         {/* Centered Content Block */}
         <div className="max-w-[750px] w-full flex flex-col items-center">
-          
+
           {/* Main Headline: Instrument Sans Extra Bold */}
           <h1 className="animate-about-hero font-sans font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] text-white tracking-[-0.02em] leading-[1.1] mb-5">
             Crafted with Passion. <br />

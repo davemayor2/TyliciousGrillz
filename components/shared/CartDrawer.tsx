@@ -1,10 +1,174 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { X, Trash2, Plus, Minus, Loader2 } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { X, Trash2, Plus, Minus, Loader2, ChevronDown } from 'lucide-react';
+import { useCart, CartItem } from '../context/CartContext';
 import gsap from '@/libs/gsap';
+
+interface CartDrawerItemProps {
+  item: CartItem;
+  updateQuantity: (cart_item_id: string, newQuantity: number) => void;
+  removeItem: (cart_item_id: string) => void;
+}
+
+function CartDrawerItem({ item, updateQuantity, removeItem }: CartDrawerItemProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const hasOptions = Boolean(item.options && Object.keys(item.options).length > 0);
+  const hasLegacyOptions = Boolean(
+    item.spiceLevel || (item.selectedSides && item.selectedSides.length > 0)
+  );
+  const hasNotes = Boolean(item.specialNotes && item.specialNotes.trim().length > 0);
+  const hasDetails = hasOptions || hasLegacyOptions || hasNotes;
+
+  return (
+    <div className="cart-inner-item py-3.5 border-b border-[#ED2C02]/10 last:border-b-0 flex flex-col gap-2 transition-colors">
+      <div className="flex items-start gap-3 w-full">
+        {/* Image Thumbnail */}
+        <div className="w-12 h-12 rounded-full overflow-hidden border border-[#ED2C02]/20 shrink-0 relative bg-[#FFE6E0] mt-0.5">
+          {item.product_image || item.product?.image ? (
+            <Image
+              src={item.product_image || item.product!.image}
+              alt={item.product_name}
+              fill
+              sizes="48px"
+              className="object-cover"
+            />
+          ) : (
+            <span className="w-full h-full flex items-center justify-center text-lg">🍗</span>
+          )}
+        </div>
+
+        {/* Metadata & Title */}
+        <div className="flex-1 text-left min-w-0 pr-1">
+          {/* Main Item Title - naturally wrapping with break-words */}
+          <span className="font-sans font-bold text-sm text-[#1A0500] block leading-snug break-words">
+            {item.product_name}
+          </span>
+
+          <span className="font-sans font-extrabold text-sm text-[#ED2C02] block mt-0.5">
+            £{item.total.toFixed(2)}
+          </span>
+
+          {/* Expandable Accordion Trigger */}
+          {hasDetails && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="mt-1 inline-flex items-center gap-1 text-[11px] font-sans font-medium text-[#777777] hover:text-[#ED2C02] transition-colors py-0.5 cursor-pointer select-none group"
+              aria-expanded={isExpanded}
+            >
+              <span>{isExpanded ? 'Hide Details' : 'View Details'}</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  isExpanded ? 'rotate-180 text-[#ED2C02]' : 'text-[#777777] group-hover:text-[#ED2C02]'
+                }`}
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Controls: Quantity + Trash */}
+        <div className="flex items-center gap-2 shrink-0 ml-auto self-start mt-0.5">
+          {/* Circular +/- Controls */}
+          <div className="flex items-center gap-1.5 bg-[#FFF5F3] p-1 rounded-full border border-[#ED2C02]/15">
+            <button
+              type="button"
+              disabled={item.quantity <= 1}
+              onClick={() => {
+                if (item.quantity > 1) {
+                  updateQuantity(item.cart_item_id, item.quantity - 1);
+                }
+              }}
+              aria-label="Decrease quantity"
+              className={`w-7 h-7 rounded-full flex items-center justify-center font-bold transition-all ${
+                item.quantity <= 1
+                  ? 'bg-gray-100 border border-gray-300 text-gray-300 cursor-not-allowed opacity-50'
+                  : 'bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] hover:bg-[#ffdad2] active:scale-95 cursor-pointer'
+              }`}
+            >
+              <Minus className="w-3.5 h-3.5 stroke-[3]" />
+            </button>
+            <span className="font-sans font-bold text-xs text-[#1A0500] w-4 text-center select-none">
+              {item.quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
+              aria-label="Increase quantity"
+              className="w-7 h-7 rounded-full bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] flex items-center justify-center font-bold hover:bg-[#ffdad2] active:scale-95 transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+            </button>
+          </div>
+
+          {/* Delete Icon */}
+          <button
+            onClick={() => removeItem(item.cart_item_id)}
+            className="text-[#ED2C02] hover:text-red-700 p-1.5 cursor-pointer shrink-0 transition-colors"
+            aria-label="Remove item"
+          >
+            <Trash2 className="w-4.5 h-4.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Expandable Options Container */}
+      {hasDetails && isExpanded && (
+        <div className="ml-15 mt-1 p-2.5 bg-[#FFF8F6] border border-[#ED2C02]/15 rounded-xl text-xs font-sans text-[#444444] space-y-1.5 text-left animate-fadeIn">
+          {/* Options from options object */}
+          {hasOptions &&
+            Object.entries(item.options || {}).map(([category, values]) => {
+              if (!values || values.length === 0) return null;
+              return (
+                <div key={category} className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2">
+                  <span className="font-bold text-[#1A0500] text-[11px] uppercase tracking-wider shrink-0">
+                    {category}:
+                  </span>
+                  <span className="text-[#555555] break-words">
+                    {values
+                      .map((v) => (v.price > 0 ? `${v.name} (+£${v.price.toFixed(2)})` : v.name))
+                      .join(', ')}
+                  </span>
+                </div>
+              );
+            })}
+
+          {/* Fallback for legacy spice level */}
+          {!hasOptions && item.spiceLevel && (
+            <div className="flex items-baseline gap-2">
+              <span className="font-bold text-[#1A0500] text-[11px] uppercase tracking-wider shrink-0">
+                Spice Level:
+              </span>
+              <span className="text-[#555555]">{item.spiceLevel}</span>
+            </div>
+          )}
+
+          {/* Fallback for legacy sides */}
+          {!hasOptions && item.selectedSides && item.selectedSides.length > 0 && (
+            <div className="flex items-baseline gap-2">
+              <span className="font-bold text-[#1A0500] text-[11px] uppercase tracking-wider shrink-0">
+                Extra Sides:
+              </span>
+              <span className="text-[#555555]">{item.selectedSides.join(', ')}</span>
+            </div>
+          )}
+
+          {/* Special Instructions */}
+          {hasNotes && (
+            <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2 pt-1 border-t border-[#ED2C02]/10">
+              <span className="font-bold text-[#1A0500] text-[11px] uppercase tracking-wider shrink-0">
+                Special Instructions:
+              </span>
+              <span className="text-[#666666] italic break-words">{item.specialNotes}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CartDrawer() {
   const {
@@ -269,81 +433,12 @@ export default function CartDrawer() {
               /* CART OVERVIEW & ITEMS ONLY */
               <div className="flex flex-col gap-1 pr-1">
                 {items.map((item) => (
-                  <div
+                  <CartDrawerItem
                     key={item.cart_item_id}
-                    className="cart-inner-item flex items-center gap-4 py-3 border-b border-[#ED2C02]/10 last:border-b-0"
-                  >
-                    {/* Image Thumbnail */}
-                    <div className="w-12 h-12 rounded-full overflow-hidden border border-[#ED2C02]/20 shrink-0 relative bg-[#FFE6E0]">
-                      {item.product_image || item.product?.image ? (
-                        <Image
-                          src={item.product_image || item.product!.image}
-                          alt={item.product_name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <span className="w-full h-full flex items-center justify-center text-lg">🍗</span>
-                      )}
-                    </div>
-
-                    {/* Metadata */}
-                    <div className="flex-1 text-left min-w-0">
-                      <span className="font-sans font-bold text-sm text-[#1A0500] block leading-tight truncate">
-                        {item.product_name}
-                      </span>
-                      {/* Sub-options summary */}
-                      <span className="font-sans text-[11px] text-[#777777] block truncate">
-                        {Object.entries(item.options || {})
-                          .map(([cat, vals]) => `${cat}: ${vals.map((v) => v.name).join(', ')}`)
-                          .join(' | ')}
-                      </span>
-                      <span className="font-sans font-extrabold text-sm text-[#1A0500] block mt-0.5">
-                        £{item.total.toFixed(2)}
-                      </span>
-                    </div>
-
-                    {/* Circular +/- Controls */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        disabled={item.quantity <= 1}
-                        onClick={() => {
-                          if (item.quantity > 1) {
-                            updateQuantity(item.cart_item_id, item.quantity - 1);
-                          }
-                        }}
-                        aria-label="Decrease quantity"
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all ${
-                          item.quantity <= 1
-                            ? 'bg-gray-100 border border-gray-300 text-gray-300 cursor-not-allowed opacity-50'
-                            : 'bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] hover:bg-[#ffdad2] active:scale-95 cursor-pointer'
-                        }`}
-                      >
-                        <Minus className="w-4.5 h-4.5 stroke-[3]" />
-                      </button>
-                      <span className="font-sans font-bold text-sm text-[#1A0500] w-4 text-center select-none">
-                        {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
-                        aria-label="Increase quantity"
-                        className="w-8 h-8 rounded-full bg-[#FFE6E0] border border-[#ED2C02] text-[#ED2C02] flex items-center justify-center font-bold hover:bg-[#ffdad2] active:scale-95 transition-all cursor-pointer"
-                      >
-                        <Plus className="w-4.5 h-4.5 stroke-[3]" />
-                      </button>
-                    </div>
-
-                    {/* Delete Icon */}
-                    <button
-                      onClick={() => removeItem(item.cart_item_id)}
-                      className="text-[#ED2C02] hover:text-red-700 p-1 cursor-pointer shrink-0 transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
+                    item={item}
+                    updateQuantity={updateQuantity}
+                    removeItem={removeItem}
+                  />
                 ))}
               </div>
             )}

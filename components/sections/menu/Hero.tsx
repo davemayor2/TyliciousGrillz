@@ -17,7 +17,7 @@ export default function Hero() {
         { scale: 1.08 },
         { scale: 1, duration: 1.8, ease: 'power2.out' }
       );
-      
+
       // Text items staggered fade-up reveal
       gsap.fromTo(
         '.animate-menu-hero',
@@ -34,7 +34,7 @@ export default function Hero() {
       {/* Background Image: Overhead culinary flat-lay with ingredients */}
       <div ref={bgRef} className="absolute inset-0 z-0">
         <Image
-          src="/images/about us (2).png"
+          src="/images/hero_image_1.jpg"
           alt="Overhead dark culinary flat-lay background with ingredients"
           fill
           priority
@@ -48,7 +48,7 @@ export default function Hero() {
       <Container className="relative z-20 text-center flex flex-col items-center">
         {/* Constrained width content block */}
         <div className="max-w-[700px] w-full flex flex-col items-center">
-          
+
           {/* Main Title: Instrument Sans Bold display */}
           <h1 className="animate-menu-hero font-sans font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] text-white tracking-[-0.02em] leading-tight mb-4">
             Our Menu

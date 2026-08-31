@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   description: "Experience premium African BBQ catering, Ghanaian wedding catering, and sizzling grilled seafood in London & Kent. Operational for pre-orders & events.",
   keywords: ["BBQ Catering London", "BBQ Catering Kent", "Ghanaian Wedding Catering", "African BBQ Catering", "grilled fish", "seafood platter", "tilapia", "croaker fish"],
   authors: [{ name: "Tylicious Grillz" }],
+  icons: {
+    icon: "/images/logo2.webp",
+    shortcut: "/images/logo2.webp",
+    apple: "/images/logo2.webp",
+  },
   openGraph: {
     title: "Tylicious Grillz | Premium BBQ Catering London & Kent",
     description: "Premium African BBQ Catering & Grilled Seafood Delivered Fresh across London & Kent.",
@@ -40,6 +45,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        <link rel="icon" href="/images/logo2.webp" type="image/webp" />
+        <link rel="apple-touch-icon" href="/images/logo2.webp" />
         {/* SEO local establishment Schema Markup (JSON-LD) */}
         <script
           type="application/ld+json"
