@@ -185,6 +185,8 @@ export default function CartDrawer() {
     checkoutStatus,
     errorMessage,
     resetCheckout,
+    fulfillmentMethod,
+    setFulfillmentMethod,
   } = useCart();
 
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -389,11 +391,11 @@ export default function CartDrawer() {
         {/* Box 2: Main Content Container Card */}
         <div
           ref={mainCardRef}
-          className="flex-1 bg-white border border-[#ED2C02] rounded-[28px] p-6 flex flex-col justify-between shadow-[6px_6px_0px_#1A0500] overflow-hidden will-change-[transform,opacity]"
+          className="flex-1 bg-white border border-[#ED2C02] rounded-[28px] flex flex-col shadow-[6px_6px_0px_#1A0500] overflow-hidden will-change-[transform,opacity] min-h-0"
         >
           
-          {/* Scrollable Upper Content Area */}
-          <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-6 scrollbar-thin">
+          {/* Scrollable items area — grows to fill available space, scrolls independently */}
+          <div className="flex-1 overflow-y-auto px-6 pt-6 pb-2 flex flex-col gap-6 scrollbar-thin min-h-0">
             
             {checkoutStatus === 'success' ? (
               <div className="cart-inner-item flex-1 flex flex-col items-center justify-center text-center py-12">
@@ -445,19 +447,68 @@ export default function CartDrawer() {
 
           </div>
 
-          {/* Fixed Bottom Billing & Action Footer */}
+          {/* Static pinned footer — shrink-0 keeps it from being squeezed by the items area */}
           {items.length > 0 && !isCheckingOut && checkoutStatus !== 'success' && (
-            <div className="cart-inner-item border-t border-[#ED2C02]/20 pt-4 mt-4 flex flex-col gap-4 bg-white shrink-0">
-              
-              {/* Doorstep Delivery Info Card */}
-              <div className="w-full bg-[#FFE6E0] border-2 border-[#1A0500] rounded-full py-3 px-4 flex flex-col items-center justify-center text-center shadow-[4px_4px_0px_#1A0500]">
-                <span className="font-sans font-bold text-sm text-[#1A0500] flex items-center gap-1.5 leading-none">
-                  🚚 Doorstep Delivery
-                </span>
-                <span className="font-sans text-[11px] text-[#666666] mt-0.5 leading-none">
-                  Delivered fresh & hot to your location
-                </span>
+            <div className="cart-inner-item shrink-0 overflow-y-auto border-t border-[#ED2C02]/20 px-6 pt-4 pb-6 flex flex-col gap-4 bg-white" style={{ maxHeight: '60vh' }}>
+
+              {/* Delivery Method Toggle */}
+              <div className="w-full">
+                <p className="font-sans font-bold text-xs text-[#1A0500] uppercase tracking-wider mb-2 text-center">
+                  How would you like your order?
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Delivery Option */}
+                  <button
+                    type="button"
+                    onClick={() => setFulfillmentMethod('Delivery')}
+                    className={`flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-2xl border-2 font-sans text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      fulfillmentMethod === 'Delivery'
+                        ? 'bg-[#ED2C02] border-[#1A0500] text-white shadow-[3px_3px_0px_#1A0500]'
+                        : 'bg-[#FFF5F3] border-[#ED2C02]/30 text-[#555555] hover:border-[#ED2C02]/60'
+                    }`}
+                  >
+                    <span className="text-lg">🚚</span>
+                    <span>Delivery</span>
+                    <span className={`text-[10px] font-normal ${
+                      fulfillmentMethod === 'Delivery' ? 'text-white/80' : 'text-[#888888]'
+                    }`}>
+                      +£5.00
+                    </span>
+                  </button>
+
+                  {/* Pickup Option */}
+                  <button
+                    type="button"
+                    onClick={() => setFulfillmentMethod('Collection')}
+                    className={`flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-2xl border-2 font-sans text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      fulfillmentMethod === 'Collection'
+                        ? 'bg-[#ED2C02] border-[#1A0500] text-white shadow-[3px_3px_0px_#1A0500]'
+                        : 'bg-[#FFF5F3] border-[#ED2C02]/30 text-[#555555] hover:border-[#ED2C02]/60'
+                    }`}
+                  >
+                    <span className="text-lg">📍</span>
+                    <span>Pickup</span>
+                    <span className={`text-[10px] font-normal ${
+                      fulfillmentMethod === 'Collection' ? 'text-white/80' : 'text-[#888888]'
+                    }`}>
+                      Free
+                    </span>
+                  </button>
+                </div>
               </div>
+
+              {/* Pickup Address Info Box */}
+              {fulfillmentMethod === 'Collection' && (
+                <div className="w-full bg-[#FFF5F3] border-2 border-[#1A0500] rounded-2xl py-3 px-4 shadow-[3px_3px_0px_#1A0500]">
+                  <p className="font-sans font-bold text-xs text-[#ED2C02] uppercase tracking-wider mb-1">📍 Pickup Location</p>
+                  <p className="font-sans font-semibold text-sm text-[#1A0500] leading-snug">
+                    Meadow Road, DA 117LR<br />Gravesend
+                  </p>
+                  <p className="font-sans text-[11px] text-[#666666] mt-1">
+                    Please collect at your scheduled time.
+                  </p>
+                </div>
+              )}
 
               {/* Billing Subtotals */}
               <div className="flex flex-col gap-2 font-sans text-sm text-[#555555]">
@@ -467,7 +518,11 @@ export default function CartDrawer() {
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery</span>
-                  <span className="font-semibold text-[#1A0500]">£{deliveryFee.toFixed(2)}</span>
+                  <span className={`font-semibold ${
+                    deliveryFee === 0 ? 'text-green-600' : 'text-[#1A0500]'
+                  }`}>
+                    {deliveryFee === 0 ? 'Free' : `£${deliveryFee.toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="border-t border-[#ED2C02]/20 my-1" />
                 <div className="flex justify-between font-sans font-bold text-base text-[#1A0500]">
@@ -480,16 +535,20 @@ export default function CartDrawer() {
               <button
                 onClick={handlePay}
                 disabled={isCheckingOut}
-                className="w-full h-14 bg-[#ED2C02] text-white rounded-full pl-6 pr-3 font-sans font-bold text-base flex items-center justify-between border-2 border-[#1A0500] shadow-[4px_4px_0px_#1A0500] active:translate-y-0.5 active:shadow-[2px_2px_0px_#1A0500] transition-all cursor-pointer hover:bg-[#ff3b10] disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full h-16 bg-[#ED2C02] text-white rounded-full pl-6 pr-3.5 font-sans font-bold text-base flex items-center justify-between border-2 border-[#1A0500] shadow-[4px_4px_0px_#1A0500] active:translate-y-0.5 active:shadow-[2px_2px_0px_#1A0500] transition-all cursor-pointer hover:bg-[#ff3b10] disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span>{isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}</span>
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[#ED2C02] shrink-0">
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shrink-0">
                   {isCheckingOut ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 text-[#ED2C02] animate-spin" />
                   ) : (
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <Image
+                      src="/order_now_arrow_orange.svg"
+                      alt="Arrow"
+                      width={18}
+                      height={18}
+                      className="w-4.5 h-4.5 object-contain"
+                    />
                   )}
                 </div>
               </button>

@@ -75,7 +75,7 @@ export default function Ordering() {
 
               {/* Subheading Paragraph */}
               <p className="font-sans text-white/85 text-base leading-relaxed mb-6 max-w-[420px]">
-                Enjoy your favourite grilled meals in just a few easy steps, from order placement to doorstep delivery.
+                Enjoy your favourite grilled meals in just a few easy steps, from order placement to doorstep delivery. We cover <strong>London, Kent &amp; Essex</strong>.
               </p>
 
               {/* Primary Order Now Button */}

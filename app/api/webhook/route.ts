@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         const stripeSessionId = session.id;
         const metadata = session.metadata || {};
         const supabaseOrderId = metadata.order_id;
+        const deliveryMethod = metadata.delivery_method as 'delivery' | 'pickup' | undefined;
         const customerEmail = session.customer_details?.email || session.customer_email;
         const customerName = session.customer_details?.name;
         const customerPhone = session.customer_details?.phone || metadata.customerPhone;
@@ -114,6 +115,7 @@ export async function POST(request: NextRequest) {
             if (customerEmail) updatePayload.customer_email = customerEmail;
             if (customerPhone) updatePayload.customer_phone = customerPhone;
             if (customerAddress) updatePayload.delivery_address = customerAddress;
+            if (deliveryMethod) updatePayload.delivery_type = deliveryMethod;
 
             let query = supabaseAdmin.from('orders').update(updatePayload);
 

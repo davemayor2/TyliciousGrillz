@@ -20,7 +20,16 @@ export default function DeliveryPolicyPage() {
             </p>
             <h2 className="font-bold text-lg text-[#1A0500] mt-4">Delivery Zones</h2>
             <p>
-              We deliver exclusively to London, Kent, and surrounding areas. Input your postcode in the checkout drawer to verify eligibility in real-time.
+              We deliver and cater across <strong>London, Kent and Essex</strong>:
+            </p>
+            <p>
+              <strong>London:</strong> Tylicious Grillz provides BBQ catering, grilled food, event catering and selected delivery services across London, including North London, South London, East London, West London, Central London and South-East London.
+            </p>
+            <p>
+              <strong>Kent:</strong> Serving customers throughout Kent, including Gravesend, Dartford, Northfleet, Ebbsfleet, Greenhithe, Swanscombe, Sevenoaks, Maidstone, Rochester, Strood, Chatham, Gillingham, Rainham, Sittingbourne, Canterbury, Ashford, Tonbridge, Tunbridge Wells, Margate, Ramsgate, Folkestone, Dover and surrounding Kent areas.
+            </p>
+            <p>
+              <strong>Essex:</strong> Catering and event services available throughout Essex, including Grays, Thurrock, Brentwood, Basildon, Chelmsford, Billericay, Wickford, Southend-on-Sea, Rayleigh, Rochford, Stanford-le-Hope, Tilbury, Harlow, Epping, Loughton, Colchester, Braintree and surrounding Essex areas.
             </p>
             <h2 className="font-bold text-lg text-[#1A0500] mt-4">Fulfillment Schedule</h2>
             <p>
@@ -28,7 +37,7 @@ export default function DeliveryPolicyPage() {
             </p>
             <h2 className="font-bold text-lg text-[#1A0500] mt-4">Delivery Charges</h2>
             <p>
-              A standard delivery charge of £5.00 applies to all London/Kent home deliveries. Collection from our spot is free.
+              A standard delivery charge applies to home deliveries across London, Kent and Essex. Collection from our spot is free.
             </p>
           </div>
         </div>

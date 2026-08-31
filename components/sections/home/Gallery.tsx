@@ -35,7 +35,7 @@ export default function Gallery() {
           {/* 1. Top-Left Card (Wide Hero Image) - Spans 2 Columns */}
           <AnimatedSection direction="left" className="md:col-span-2 relative group overflow-hidden rounded-[24px] aspect-[16/10] md:aspect-[2.1/1] border border-brand-orange/5 shadow-sm bg-white cursor-pointer">
             <Image
-              src="/images/Frame 153.png"
+              src="/images/gallery_img.jpg"
               alt="Grilled chicken pieces sizzling on an open grill"
               fill
               sizes="(max-width: 768px) 100vw, 66vw"

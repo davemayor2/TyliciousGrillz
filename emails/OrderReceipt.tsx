@@ -35,6 +35,7 @@ export interface OrderData {
   customer_phone?: string | null;
   delivery_address?: string | null;
   fulfillment_method?: string | null;
+  delivery_type?: 'delivery' | 'pickup' | string | null;
   subtotal: number;
   delivery_fee: number;
   total: number;
@@ -213,6 +214,41 @@ export const OrderReceipt: React.FC<OrderReceiptProps> = ({ order, order_items =
                 </Row>
               )}
             </Section>
+
+            {/* Delivery Method Block */}
+            {(() => {
+              const isPickup =
+                order.delivery_type === 'pickup' ||
+                order.fulfillment_method === 'Collection';
+              return (
+                <Section style={deliveryMethodBox}>
+                  {isPickup ? (
+                    <>
+                      <Text style={deliveryMethodLabel}>📍 METHOD: STORE PICKUP</Text>
+                      <Text style={deliveryMethodValue}>
+                        Pickup Location: Meadow Road, DA 117LR, Gravesend
+                      </Text>
+                      <Text style={deliveryMethodNote}>
+                        Please collect your order at your scheduled time. No delivery charge applies.
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={deliveryMethodLabel}>🚚 METHOD: DELIVERY</Text>
+                      {order.delivery_address ? (
+                        <Text style={deliveryMethodValue}>
+                          Delivery Address: {order.delivery_address}
+                        </Text>
+                      ) : (
+                        <Text style={deliveryMethodNote}>
+                          Address will be confirmed at dispatch.
+                        </Text>
+                      )}
+                    </>
+                  )}
+                </Section>
+              );
+            })()}
 
             {/* Items Table */}
             <Section style={itemsSection}>
@@ -546,4 +582,35 @@ const footerSubtext = {
   color: '#999999',
   fontSize: '11px',
   margin: '0',
+};
+
+const deliveryMethodBox = {
+  backgroundColor: '#F0FDF4',
+  border: '1.5px solid #86EFAC',
+  borderRadius: '16px',
+  padding: '14px 20px',
+  marginBottom: '24px',
+};
+
+const deliveryMethodLabel = {
+  color: '#15803D',
+  fontSize: '11px',
+  fontWeight: '800',
+  letterSpacing: '0.8px',
+  margin: '0 0 6px 0',
+  textTransform: 'uppercase' as const,
+};
+
+const deliveryMethodValue = {
+  color: '#1A0500',
+  fontSize: '14px',
+  fontWeight: '700',
+  margin: '0 0 4px 0',
+};
+
+const deliveryMethodNote = {
+  color: '#555555',
+  fontSize: '12px',
+  margin: '0',
+  fontStyle: 'italic' as const,
 };

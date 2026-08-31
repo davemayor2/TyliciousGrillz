@@ -52,9 +52,11 @@ export default function Contact() {
               </div>
               <h3 className="font-judson font-bold text-2xl text-brand-brown mb-2">Our Grill Spot</h3>
               <p className="font-sans text-brand-brown/75 text-sm md:text-base mb-4">
-                Come pick up your orders or dine-in.
+                BBQ catering, grilled food &amp; event services across London, Kent &amp; Essex.
               </p>
-              <span className="font-sans font-bold text-base text-brand-brown">London, Kent, and surrounding areas</span>
+              <span className="font-sans font-bold text-sm text-brand-brown text-center leading-relaxed">
+                London · Kent · Essex
+              </span>
             </Card>
           </AnimatedSection>
 
@@ -79,7 +81,7 @@ export default function Contact() {
             <div className="text-center md:text-left max-w-xl">
               <span className="font-sans font-semibold text-xs tracking-wider uppercase text-brand-orange block mb-2">Bulk Orders & Events</span>
               <h4 className="font-judson font-bold text-2xl md:text-3xl text-white mb-3">Host Your Event With Tylicious Grillz</h4>
-              <p className="font-sans text-sm text-white/70">We provide premium catering services and live grilling setups for private parties, birthdays, corporate events, and wedding afterparties.</p>
+              <p className="font-sans text-sm text-white/70">We provide premium catering services and live grilling setups for private parties, birthdays, corporate events, and wedding afterparties across <strong>London, Kent &amp; Essex</strong>.</p>
             </div>
             <button
               onClick={handleWhatsAppRedirect}

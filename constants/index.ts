@@ -17,6 +17,12 @@ export const BRAND_COLORS = {
   footer: '#2A0300',
 };
 
+export const SOCIAL_LINKS = {
+  facebook: 'https://www.facebook.com/Tyliciousgrillz',
+  tiktok: 'https://www.tiktok.com/@tyliciousgrillz?is_from_webapp=1&sender_device=pc',
+  instagram: 'https://www.instagram.com/tyliciousgrillz?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==',
+};
+
 export const WHY_LOVE_US_DATA: WhyLoveUsCard[] = [
   {
     id: 'grilled-daily',
@@ -140,7 +146,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     name: 'Sizzling Suya',
     description: 'Suya with fresh Tomatoes & Onions, seasoned with authentic Suya pepper, served with Fried Plantain & Chips.',
     price: 15,
-    image: '/images/Frame 153.png',
+    image: '/images/suya_pfp.jpg',
     category: 'lamb-beef',
     popular: true,
     spicy: true,

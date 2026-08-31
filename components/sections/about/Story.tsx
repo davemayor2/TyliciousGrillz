@@ -13,7 +13,7 @@ export default function Story() {
 
       <Container className="max-w-[1200px]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          
+
           {/* Left Column (Stacked Collage Container Card) */}
           <div className="lg:col-span-6 relative w-full">
             <AnimatedSection direction="left" className="relative w-full">
@@ -22,14 +22,14 @@ export default function Story() {
 
               {/* Main White Card Container (Front Layer) */}
               <div className="relative z-10 bg-white border border-black/5 p-5 md:p-6 rounded-[32px] flex flex-col shadow-md">
-                
+
                 {/* Internal Collage Layout */}
                 <div className="flex flex-col gap-4 w-full">
-                  
+
                   {/* Top Row (Hero Image) - aspect 16:9 */}
                   <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-brand-bg shadow-sm">
                     <Image
-                      src="/images/about us (2).png"
+                      src="/images/about_grid.jpeg"
                       alt="Chef grilling fish over open flames with vegetables in the foreground"
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
@@ -51,7 +51,7 @@ export default function Story() {
                         loading="lazy"
                       />
                     </div>
-                    
+
                     {/* Sub-Image 2 */}
                     <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-brand-bg shadow-sm">
                       <Image

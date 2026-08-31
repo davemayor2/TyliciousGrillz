@@ -112,6 +112,24 @@ export const NewOrderAlert: React.FC<NewOrderAlertProps> = ({ order, order_items
                 </Row>
               )}
 
+              {/* Delivery Method Highlight */}
+              {(() => {
+                const isPickup =
+                  (order as OrderData & { delivery_type?: string }).delivery_type === 'pickup' ||
+                  order.fulfillment_method === 'Collection';
+                return (
+                  <Row style={{ ...infoRow, marginTop: '8px' }}>
+                    <Column style={{ width: '100%' }}>
+                      <Text style={deliveryMethodBadge}>
+                        {isPickup
+                          ? '📍 STORE PICKUP — Customer collects from Meadow Road, DA 117LR, Gravesend'
+                          : '🚚 DELIVERY — Dispatch to customer address above'}
+                      </Text>
+                    </Column>
+                  </Row>
+                );
+              })()}
+
               <Row style={infoRow}>
                 <Column style={{ width: '35%' }}>
                   <Text style={infoLabel}>ORDER TIME:</Text>
@@ -384,4 +402,15 @@ const footerText = {
   color: '#94A3B8',
   fontSize: '11px',
   margin: '0',
+};
+
+const deliveryMethodBadge = {
+  backgroundColor: '#1A0500',
+  color: '#FFFFFF',
+  fontSize: '12px',
+  fontWeight: '800',
+  padding: '8px 14px',
+  borderRadius: '10px',
+  margin: '0',
+  letterSpacing: '0.3px',
 };

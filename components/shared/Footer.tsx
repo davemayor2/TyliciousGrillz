@@ -24,7 +24,7 @@ export default function Footer() {
 
               <div className="flex flex-col gap-2.5 font-sans text-sm text-white/80 leading-relaxed text-left">
                 <p>Phone: +44 7597 934557</p>
-                <p>Address: London & Kent, United Kingdom</p>
+                <p>Address: Meadow Road, DA 117LR. Gravesend</p>
                 <p>Email: info@tyliciousgrillz.com</p>
               </div>
 
@@ -52,7 +52,9 @@ export default function Footer() {
               <div className="flex items-center gap-4 mt-1">
                 {/* Instagram */}
                 <Link
-                  href="#"
+                  href="https://www.instagram.com/tyliciousgrillz?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw=="
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label="Instagram"
                   className="w-10 h-10 rounded-full border border-white/30 hover:border-white hover:bg-white/10 flex items-center justify-center text-white transition-all duration-200"
                 >
@@ -61,7 +63,9 @@ export default function Footer() {
 
                 {/* TikTok (Custom SVG Outline) */}
                 <Link
-                  href="#"
+                  href="https://www.tiktok.com/@tyliciousgrillz?is_from_webapp=1&sender_device=pc"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label="TikTok"
                   className="w-10 h-10 rounded-full border border-white/30 hover:border-white hover:bg-white/10 flex items-center justify-center text-white transition-all duration-200"
                 >
@@ -72,7 +76,9 @@ export default function Footer() {
 
                 {/* Facebook */}
                 <Link
-                  href="#"
+                  href="https://www.facebook.com/Tyliciousgrillz"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label="Facebook"
                   className="w-10 h-10 rounded-full border border-white/30 hover:border-white hover:bg-white/10 flex items-center justify-center text-white transition-all duration-200"
                 >
@@ -141,17 +147,36 @@ export default function Footer() {
 
           </div>
 
-          {/* Middle Section (Delivery Areas) */}
-          <div className="mt-12 pt-10 border-t border-white/10 text-center w-full">
-            <h3 className="font-sans font-bold text-lg md:text-xl text-white tracking-tight">
-              We Deliver To Your Area
+          {/* Middle Section (Delivery & Catering Coverage) */}
+          <div className="mt-12 pt-10 border-t border-white/10 w-full">
+            <h3 className="font-sans font-bold text-lg md:text-xl text-white tracking-tight text-center mb-6">
+              Delivery &amp; Catering Coverage
             </h3>
 
-            {/* Area Tags Row */}
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 mt-4 font-sans text-sm text-white/80">
-              <span>London</span>
-              <span>Kent</span>
-              <span>And surrounding areas</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+              {/* London */}
+              <div>
+                <p className="font-sans font-semibold text-[#FD9F02] text-sm uppercase tracking-wide mb-2">London</p>
+                <p className="font-sans text-xs text-white/70 leading-relaxed">
+                  Tylicious Grillz provides BBQ catering, grilled food, event catering and selected delivery services across London, including North London, South London, East London, West London, Central London and South-East London.
+                </p>
+              </div>
+
+              {/* Kent */}
+              <div>
+                <p className="font-sans font-semibold text-[#FD9F02] text-sm uppercase tracking-wide mb-2">Kent</p>
+                <p className="font-sans text-xs text-white/70 leading-relaxed">
+                  Serving customers throughout Kent, including Gravesend, Dartford, Northfleet, Ebbsfleet, Greenhithe, Swanscombe, Sevenoaks, Maidstone, Rochester, Strood, Chatham, Gillingham, Rainham, Sittingbourne, Canterbury, Ashford, Tonbridge, Tunbridge Wells, Margate, Ramsgate, Folkestone, Dover and surrounding Kent areas.
+                </p>
+              </div>
+
+              {/* Essex */}
+              <div>
+                <p className="font-sans font-semibold text-[#FD9F02] text-sm uppercase tracking-wide mb-2">Essex</p>
+                <p className="font-sans text-xs text-white/70 leading-relaxed">
+                  Catering and event services available throughout Essex, including Grays, Thurrock, Brentwood, Basildon, Chelmsford, Billericay, Wickford, Southend-on-Sea, Rayleigh, Rochford, Stanford-le-Hope, Tilbury, Harlow, Epping, Loughton, Colchester, Braintree and surrounding Essex areas.
+                </p>
+              </div>
             </div>
           </div>
 

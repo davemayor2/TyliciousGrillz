@@ -19,6 +19,9 @@ export async function POST(request: NextRequest) {
 
     const items = body.items;
     const fulfillment = body.fulfillment_method || body.fulfillment || 'Delivery';
+    // 'delivery_method' maps Pickup→Collection, Delivery→Delivery
+    const deliveryMethod: 'delivery' | 'pickup' =
+      fulfillment === 'Collection' ? 'pickup' : 'delivery';
     const deliveryAddress = customerDetails.delivery_address || body.deliveryAddress || '';
     const postcode = customerDetails.postcode || body.postcode || '';
     const scheduledDate = customerDetails.scheduled_date || body.scheduledDate || '';
@@ -138,6 +141,7 @@ export async function POST(request: NextRequest) {
             customer_phone: customerPhone || null,
             delivery_address: fullAddress,
             fulfillment_method: fulfillment,
+            delivery_type: deliveryMethod,
             subtotal: calculatedSubtotal,
             delivery_fee: deliveryFee,
             total: calculatedTotal,
@@ -257,15 +261,13 @@ export async function POST(request: NextRequest) {
       phone_number_collection: {
         enabled: true,
       },
-      shipping_address_collection: {
-        allowed_countries: ['GB'],
-      },
       billing_address_collection: 'required',
       success_url: `${baseUrl}/order-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/menu?canceled=true`,
       metadata: {
         order_id: supabaseOrderId ? String(supabaseOrderId) : '',
         fulfillment,
+        delivery_method: deliveryMethod,
         postcode,
         deliveryAddress: deliveryAddress || postcode,
         scheduledDate,
@@ -276,6 +278,13 @@ export async function POST(request: NextRequest) {
         customerPhone,
       },
     };
+
+    // Only collect shipping address for delivery orders
+    if (deliveryMethod === 'delivery') {
+      sessionParams.shipping_address_collection = {
+        allowed_countries: ['GB'],
+      };
+    }
 
     if (customerEmail && typeof customerEmail === 'string' && customerEmail.includes('@')) {
       sessionParams.customer_email = customerEmail;
