@@ -535,19 +535,19 @@ export default function CartDrawer() {
               <button
                 onClick={handlePay}
                 disabled={isCheckingOut}
-                className="w-full h-16 bg-[#ED2C02] text-white rounded-full pl-6 pr-3.5 font-sans font-bold text-base flex items-center justify-between border-2 border-[#1A0500] shadow-[4px_4px_0px_#1A0500] active:translate-y-0.5 active:shadow-[2px_2px_0px_#1A0500] transition-all cursor-pointer hover:bg-[#ff3b10] disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full h-12 bg-[#ED2C02] text-white rounded-full pl-5 pr-2 font-sans font-bold text-sm sm:text-base flex items-center justify-between border-2 border-[#1A0500] shadow-[3px_3px_0px_#1A0500] active:translate-y-0.5 active:shadow-[1px_1px_0px_#1A0500] transition-all cursor-pointer hover:bg-[#ff3b10] disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span>{isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}</span>
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shrink-0">
                   {isCheckingOut ? (
-                    <Loader2 className="w-4 h-4 text-[#ED2C02] animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 text-[#ED2C02] animate-spin" />
                   ) : (
                     <Image
                       src="/order_now_arrow_orange.svg"
                       alt="Arrow"
-                      width={18}
-                      height={18}
-                      className="w-4.5 h-4.5 object-contain"
+                      width={15}
+                      height={15}
+                      className="w-3.5 h-3.5 object-contain"
                     />
                   )}
                 </div>
