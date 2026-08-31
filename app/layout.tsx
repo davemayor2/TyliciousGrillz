@@ -96,9 +96,15 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Tylicious Grillz" }],
   icons: {
-    icon: "/images/logo2.webp",
+    icon: [
+      { url: "/images/logo2.webp", type: "image/webp" },
+      { url: "/icon.webp", type: "image/webp" },
+      { url: "/favicon.ico" },
+    ],
     shortcut: "/images/logo2.webp",
-    apple: "/images/logo2.webp",
+    apple: [
+      { url: "/images/logo2.webp", sizes: "180x180", type: "image/webp" },
+    ],
   },
   openGraph: {
     title: "Tylicious Grillz | Premium African BBQ Catering – London, Kent & Essex",
