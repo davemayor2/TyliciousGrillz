@@ -147,6 +147,7 @@ export async function POST(request: NextRequest) {
             total: calculatedTotal,
             payment_status: 'pending',
             order_status: 'pending',
+            receipt_sent: false,
           })
           .select('id')
           .single();

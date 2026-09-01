@@ -12,6 +12,8 @@ import { CheckCircle2, ArrowRight, Utensils } from 'lucide-react';
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const orderId = searchParams.get('order_id') || searchParams.get('orderId');
+  const userEmail = searchParams.get('email') || searchParams.get('userEmail');
   const { clearCart } = useCart();
   const hasClearedRef = React.useRef(false);
 
@@ -23,18 +25,18 @@ function OrderSuccessContent() {
       hasClearedRef.current = true;
       clearCart();
 
-      // Trigger fail-safe order confirmation and email dispatch
-      if (sessionId) {
+      // Trigger fail-safe order confirmation and email dispatch with atomic idempotency check
+      if (sessionId || orderId) {
         fetch('/api/order/confirm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
+          body: JSON.stringify({ sessionId, orderId, userEmail }),
         }).catch((err) => {
           console.warn('Order confirmation check:', err);
         });
       }
     }
-  }, [clearCart, sessionId]);
+  }, [clearCart, sessionId, orderId, userEmail]);
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col justify-between">

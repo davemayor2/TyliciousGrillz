@@ -103,12 +103,14 @@ export async function POST(request: NextRequest) {
           paymentStatus: session.payment_status,
         });
 
-        // 3. Update the matching order in Supabase to 'paid' and 'confirmed'
+        // 3. Update the matching order in Supabase to 'paid' and 'confirmed' with atomic receipt_sent check
+        let shouldSendEmail = true;
         if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
           try {
             const updatePayload: Record<string, unknown> = {
               payment_status: 'paid',
               order_status: 'confirmed',
+              receipt_sent: true,
             };
 
             if (customerName) updatePayload.customer_name = customerName;
@@ -117,32 +119,38 @@ export async function POST(request: NextRequest) {
             if (customerAddress) updatePayload.delivery_address = customerAddress;
             if (deliveryMethod) updatePayload.delivery_type = deliveryMethod;
 
-            let query = supabaseAdmin.from('orders').update(updatePayload);
+            const baseQuery = supabaseAdmin.from('orders').update(updatePayload);
 
-            if (supabaseOrderId) {
-              query = query.eq('id', supabaseOrderId);
-            } else {
-              query = query.eq('stripe_session_id', stripeSessionId);
-            }
+            const filterQuery = supabaseOrderId
+              ? baseQuery.eq('id', supabaseOrderId)
+              : baseQuery.eq('stripe_session_id', stripeSessionId);
 
-            const { data: updatedOrder, error: dbError } = await query.select().single();
+            // Atomic condition: only claim email dispatch if receipt_sent is currently false
+            const { data: updatedRows, error: dbError } = await filterQuery
+              .eq('receipt_sent', false)
+              .select();
 
             if (dbError) {
               console.warn('⚠️ Supabase order status update notice:', dbError.message);
+            } else if (!updatedRows || updatedRows.length === 0) {
+              console.log(`ℹ️ [Webhook] Order #${supabaseOrderId || stripeSessionId} receipt already processed. Skipping duplicate email.`);
+              shouldSendEmail = false;
             } else {
-              console.log(`✅ Order #${supabaseOrderId || updatedOrder?.id} marked as PAID & CONFIRMED in Supabase!`);
+              console.log(`✅ [Webhook] Order #${supabaseOrderId || updatedRows[0]?.id} marked as PAID & receipt claimed in Supabase!`);
             }
           } catch (dbErr) {
             console.warn('⚠️ Could not update Supabase orders table:', dbErr);
           }
         }
 
-        // 4. Trigger Resend Email Notifications (Receipt to Customer & Alert to Restaurant)
-        const targetOrderId = supabaseOrderId || stripeSessionId;
-        try {
-          await sendOrderNotifications(targetOrderId);
-        } catch (emailErr) {
-          console.warn('⚠️ Notification email dispatch encountered an error:', emailErr);
+        // 4. Trigger Resend Email Notifications if not already dispatched
+        if (shouldSendEmail) {
+          const targetOrderId = supabaseOrderId || stripeSessionId;
+          try {
+            await sendOrderNotifications(targetOrderId);
+          } catch (emailErr) {
+            console.warn('⚠️ Notification email dispatch encountered an error:', emailErr);
+          }
         }
 
         break;
