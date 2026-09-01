@@ -13,7 +13,7 @@ export default function Ordering() {
 
   const handleMouseEnter = () => {
     if (!arrowRef.current) return;
-    
+
     // Kill any active hover timeline
     if (hoverTlRef.current) {
       hoverTlRef.current.kill();
@@ -44,7 +44,7 @@ export default function Ordering() {
       hoverTlRef.current.kill();
       hoverTlRef.current = null;
     }
-    
+
     // Smoothly reset the arrow position
     if (arrowRef.current) {
       gsap.to(arrowRef.current, {
@@ -64,7 +64,7 @@ export default function Ordering() {
 
       <Container>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          
+
           {/* Left Column: Ordering Content & Badges */}
           <div className="lg:col-span-6 flex flex-col items-start text-left">
             <AnimatedSection direction="left">
@@ -144,11 +144,11 @@ export default function Ordering() {
             <AnimatedSection direction="right" className="relative w-full max-w-[500px]">
               {/* Back Layer (Shadow Base) */}
               <div className="absolute inset-0 bg-[#FFEAE6] rounded-[28px] translate-x-4 translate-y-4 z-0" />
-              
+
               {/* Front Main Layer (Video Frame) */}
               <div suppressHydrationWarning className="relative z-10 w-full aspect-[4/3] bg-black rounded-[24px] overflow-hidden flex items-center justify-center shadow-md">
                 <video
-                  src="/Home page video 1.mp4"
+                  src="/grilled_turkey.mp4"
                   controls
                   loop
                   muted
