@@ -148,7 +148,7 @@ export default function Ordering() {
               {/* Front Main Layer (Video Frame) */}
               <div suppressHydrationWarning className="relative z-10 w-full aspect-[4/3] bg-black rounded-[24px] overflow-hidden flex items-center justify-center shadow-md">
                 <video
-                  src="/grilled_turkey.mp4"
+                  src="/vids/grilled_turkey.mp4"
                   controls
                   loop
                   muted
