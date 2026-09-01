@@ -133,27 +133,53 @@ export async function POST(request: NextRequest) {
 
     if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
-        const { data: orderData, error: orderError } = await supabaseAdmin
+        const fullInsertPayload: Record<string, unknown> = {
+          customer_name: customerName || null,
+          customer_email: customerEmail || null,
+          customer_phone: customerPhone || null,
+          delivery_address: fullAddress,
+          fulfillment_method: fulfillment,
+          delivery_type: deliveryMethod,
+          subtotal: calculatedSubtotal,
+          delivery_fee: deliveryFee,
+          total: calculatedTotal,
+          payment_status: 'pending',
+          order_status: 'pending',
+          receipt_sent: false,
+        };
+
+        let insertRes = await supabaseAdmin
           .from('orders')
-          .insert({
+          .insert(fullInsertPayload)
+          .select('id')
+          .single();
+
+        // If insert failed (e.g. delivery_type or receipt_sent columns not in Supabase schema), fallback to baseline core columns
+        if (insertRes.error) {
+          console.warn('⚠️ Supabase full orders insert notice:', insertRes.error.message, 'Retrying with core columns...');
+          const coreInsertPayload: Record<string, unknown> = {
             customer_name: customerName || null,
             customer_email: customerEmail || null,
             customer_phone: customerPhone || null,
             delivery_address: fullAddress,
             fulfillment_method: fulfillment,
-            delivery_type: deliveryMethod,
             subtotal: calculatedSubtotal,
             delivery_fee: deliveryFee,
             total: calculatedTotal,
             payment_status: 'pending',
             order_status: 'pending',
-            receipt_sent: false,
-          })
-          .select('id')
-          .single();
+          };
+          insertRes = await supabaseAdmin
+            .from('orders')
+            .insert(coreInsertPayload)
+            .select('id')
+            .single();
+        }
+
+        const { data: orderData, error: orderError } = insertRes;
 
         if (orderError) {
-          console.warn('⚠️ Supabase orders insertion warning:', orderError.message);
+          console.error('❌ Supabase orders insertion error:', orderError.message);
         } else if (orderData?.id) {
           supabaseOrderId = orderData.id;
 

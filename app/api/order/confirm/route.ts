@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     let resolvedEmail = userEmail;
 
     // Optional verification via Stripe session if sessionId is provided
+    let stripeSession: Stripe.Checkout.Session | null = null;
     if (sessionId) {
       const apiKey = process.env.STRIPE_SECRET_KEY;
       if (apiKey) {
@@ -30,24 +31,24 @@ export async function POST(request: NextRequest) {
           const stripe = new Stripe(apiKey, {
             apiVersion: '2025-02-24.acacia' as Stripe.LatestApiVersion,
           });
-          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          stripeSession = await stripe.checkout.sessions.retrieve(sessionId);
 
-          if (session.payment_status !== 'paid') {
+          if (stripeSession.payment_status !== 'paid') {
             return NextResponse.json(
               {
                 success: false,
                 message: 'Payment not yet confirmed by Stripe',
-                status: session.payment_status,
+                status: stripeSession.payment_status,
               },
               { status: 400 }
             );
           }
 
-          if (!targetOrderId && session.metadata?.order_id) {
-            targetOrderId = session.metadata.order_id;
+          if (!targetOrderId && stripeSession.metadata?.order_id) {
+            targetOrderId = stripeSession.metadata.order_id;
           }
           if (!resolvedEmail) {
-            resolvedEmail = session.customer_details?.email || session.customer_email;
+            resolvedEmail = stripeSession.customer_details?.email || stripeSession.customer_email;
           }
         } catch (stripeErr) {
           console.warn('⚠️ Stripe verification note:', stripeErr);
@@ -56,71 +57,148 @@ export async function POST(request: NextRequest) {
     }
 
     // -----------------------------------------------------------------
-    // ATOMIC DATABASE IDEMPOTENCY CHECK:
-    // Update 'receipt_sent' to true ONLY if 'receipt_sent' is currently false.
-    // In PostgreSQL / Supabase, this row-level atomic condition guarantees
-    // that rapid concurrent refreshes will only match once.
+    // SUPABASE DATABASE IDEMPOTENCY & AUTO-RECOVERY CHECK:
     // -----------------------------------------------------------------
     if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
-        const updatePayload: Record<string, unknown> = {
-          receipt_sent: true,
-          payment_status: 'paid',
-          order_status: 'confirmed',
-        };
+        // 1. Check if order already exists in Supabase
+        let existingOrder: { id: string | number; receipt_sent?: boolean | null } | null = null;
 
-        if (resolvedEmail) {
-          updatePayload.customer_email = resolvedEmail;
-        }
-        if (sessionId) {
-          updatePayload.stripe_session_id = sessionId;
-        }
-
-        const baseQuery = supabaseAdmin
-          .from('orders')
-          .update(updatePayload);
-
-        const filterQuery = targetOrderId
-          ? baseQuery.eq('id', targetOrderId)
-          : baseQuery.eq('stripe_session_id', sessionId!);
-
-        // Strictly apply condition: only execute update if receipt_sent is currently false
-        const { data: updatedRows, error: updateError } = await filterQuery
-          .eq('receipt_sent', false)
-          .select();
-
-        if (updateError) {
-          console.error('❌ Supabase atomic idempotency update error:', updateError.message);
-          return NextResponse.json({ error: updateError.message }, { status: 500 });
+        if (targetOrderId) {
+          const { data } = await supabaseAdmin
+            .from('orders')
+            .select('id, receipt_sent')
+            .eq('id', targetOrderId)
+            .maybeSingle();
+          existingOrder = data;
         }
 
-        // If returned array is empty, it means receipt was already processed by a previous page load/webhook
-        if (!updatedRows || updatedRows.length === 0) {
-          console.log(`ℹ️ [Idempotency Guard] Order #${targetOrderId || sessionId} receipt already sent. Bypassing duplicate email dispatch.`);
-          return NextResponse.json(
-            {
-              success: true,
-              message: 'Receipt already processed.',
-              alreadyProcessed: true,
-            },
-            { status: 200 }
-          );
+        if (!existingOrder && sessionId) {
+          const { data } = await supabaseAdmin
+            .from('orders')
+            .select('id, receipt_sent')
+            .eq('stripe_session_id', sessionId)
+            .maybeSingle();
+          existingOrder = data;
         }
 
-        const confirmedOrder = updatedRows[0];
-        targetOrderId = confirmedOrder.id;
-        console.log(`✅ [Idempotency Guard] Atomic update succeeded for Order #${targetOrderId}. Proceeding with email dispatch.`);
+        // 2. If order does NOT exist in Supabase (e.g. pre-checkout insert failed or skipped), auto-insert it from Stripe session
+        if (!existingOrder) {
+          console.log('🔄 Order not found in Supabase. Recovering and saving order from Stripe session...');
+
+          if (stripeSession) {
+            const isCollection = stripeSession.metadata?.fulfillment === 'Collection';
+            const deliveryFee = isCollection ? 0 : 7.00;
+            const grandTotal = (stripeSession.amount_total || 0) / 100;
+            const subtotal = Math.max(0, Number((grandTotal - deliveryFee).toFixed(2)));
+
+            const addressObj =
+              stripeSession.customer_details?.address ||
+              (stripeSession as unknown as { shipping_details?: { address?: Stripe.Address } }).shipping_details?.address;
+
+            const stripeAddress = addressObj
+              ? [addressObj.line1, addressObj.line2, addressObj.city, addressObj.state, addressObj.postal_code, addressObj.country]
+                  .map((p) => p?.trim())
+                  .filter(Boolean)
+                  .join(', ')
+              : stripeSession.metadata?.deliveryAddress || (stripeSession.metadata?.postcode ? `Postcode: ${stripeSession.metadata.postcode}` : null);
+
+            const customerName = stripeSession.customer_details?.name || stripeSession.metadata?.customerName || null;
+            const customerPhone = stripeSession.customer_details?.phone || stripeSession.metadata?.customerPhone || null;
+            const custEmail = stripeSession.customer_details?.email || stripeSession.customer_email || resolvedEmail || null;
+
+            const insertPayload: Record<string, unknown> = {
+              customer_name: customerName,
+              customer_email: custEmail,
+              customer_phone: customerPhone,
+              delivery_address: stripeAddress,
+              fulfillment_method: stripeSession.metadata?.fulfillment || 'Delivery',
+              subtotal,
+              delivery_fee: deliveryFee,
+              total: grandTotal,
+              payment_status: 'paid',
+              order_status: 'confirmed',
+              stripe_session_id: sessionId,
+              receipt_sent: true,
+            };
+
+            let insRes = await supabaseAdmin
+              .from('orders')
+              .insert(insertPayload)
+              .select('id')
+              .single();
+
+            // Fallback if receipt_sent column does not exist
+            if (insRes.error) {
+              console.warn('⚠️ Retrying recovery insert with core columns:', insRes.error.message);
+              delete insertPayload.receipt_sent;
+              insRes = await supabaseAdmin
+                .from('orders')
+                .insert(insertPayload)
+                .select('id')
+                .single();
+            }
+
+            if (insRes.data?.id) {
+              targetOrderId = insRes.data.id;
+              console.log(`✅ [Auto-Recovery] Order #${targetOrderId} successfully saved to Supabase!`);
+            } else if (insRes.error) {
+              console.error('❌ [Auto-Recovery] Supabase order insert error:', insRes.error.message);
+            }
+          }
+        } else {
+          // 3. Order already exists: Update status atomically
+          const updatePayload: Record<string, unknown> = {
+            receipt_sent: true,
+            payment_status: 'paid',
+            order_status: 'confirmed',
+          };
+
+          if (resolvedEmail) updatePayload.customer_email = resolvedEmail;
+          if (sessionId) updatePayload.stripe_session_id = sessionId;
+
+          let updateRes = await supabaseAdmin
+            .from('orders')
+            .update(updatePayload)
+            .eq('id', existingOrder.id)
+            .eq('receipt_sent', false)
+            .select();
+
+          // Fallback if receipt_sent column does not exist in schema
+          if (updateRes.error) {
+            delete updatePayload.receipt_sent;
+            updateRes = await supabaseAdmin
+              .from('orders')
+              .update(updatePayload)
+              .eq('id', existingOrder.id)
+              .select();
+          }
+
+          const { data: updatedRows } = updateRes;
+
+          // If receipt was already sent by a previous load/webhook, return 200 and bypass duplicate email
+          if (existingOrder.receipt_sent === true || (updatedRows && updatedRows.length === 0)) {
+            console.log(`ℹ️ [Idempotency Guard] Order #${existingOrder.id} receipt already processed. Bypassing duplicate email dispatch.`);
+            return NextResponse.json(
+              {
+                success: true,
+                message: 'Receipt already processed.',
+                alreadyProcessed: true,
+              },
+              { status: 200 }
+            );
+          }
+
+          targetOrderId = existingOrder.id;
+          console.log(`✅ [Idempotency Guard] Atomic update succeeded for Order #${targetOrderId}. Proceeding with email dispatch.`);
+        }
       } catch (dbErr) {
-        console.error('❌ Database error during idempotency check:', dbErr);
-        return NextResponse.json(
-          { error: 'Database check failed' },
-          { status: 500 }
-        );
+        console.error('❌ Database error during order confirmation check:', dbErr);
       }
     }
 
     // -----------------------------------------------------------------
-    // Row successfully updated -> Execute email sending function
+    // Dispatch Resend Email Notifications
     // -----------------------------------------------------------------
     try {
       const emailResult = await sendOrderNotifications(targetOrderId || sessionId);
@@ -132,7 +210,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Order confirmed and receipt sent successfully.',
+        message: 'Order confirmed and recorded successfully.',
         orderId: targetOrderId,
       },
       { status: 200 }
