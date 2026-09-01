@@ -135,7 +135,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     id: 'mixed-grill',
     name: 'Mixed Grill',
     description: 'Turkey, Lamb Chops & Lamb Ribs char-grilled and served with Fried Plantain & Chips.',
-    price: 35,
+    price: 1,
     image: '/images/lamb&beef.webp',
     category: 'lamb-beef',
     popular: true,
@@ -174,21 +174,21 @@ export const FAVORITES_DATA: MenuItem[] = [
 export const TESTIMONIALS_DATA: Testimonial[] = [
   {
     id: '1',
-    name: 'Sandra Nwosu',
+    name: 'George Thomas',
     rating: 5,
     comment: 'The grilled fish was absolutely amazing. Delivery was quick too.',
     role: 'Loyal Customer',
   },
   {
     id: '2',
-    name: 'David Adeleke',
+    name: 'William Henry',
     rating: 5,
     comment: "Best grill spot I've tried in a long time.",
     role: 'Food Enthusiast',
   },
   {
     id: '3',
-    name: 'Amina Bello',
+    name: 'Oliver James',
     rating: 5,
     comment: 'Food arrived hot and tasted incredible.',
     role: 'Regular Patron',
