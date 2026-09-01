@@ -168,7 +168,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   const deliveryFee = useMemo(() => {
-    return fulfillmentMethod === 'Delivery' ? 5.00 : 0.00;
+    return fulfillmentMethod === 'Delivery' ? 7.00 : 0.00;
   }, [fulfillmentMethod]);
 
   const cartTotal = useMemo(() => {

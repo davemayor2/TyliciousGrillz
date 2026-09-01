@@ -472,7 +472,7 @@ export default function CartDrawer() {
                     <span className={`text-[10px] font-normal ${
                       fulfillmentMethod === 'Delivery' ? 'text-white/80' : 'text-[#888888]'
                     }`}>
-                      +£5.00
+                      +£7.00
                     </span>
                   </button>
 

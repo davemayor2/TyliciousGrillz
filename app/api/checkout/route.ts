@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Delivery calculation
     const isDelivery = fulfillment !== 'Collection';
-    const deliveryFee = isDelivery ? 5.00 : 0.00;
+    const deliveryFee = isDelivery ? 7.00 : 0.00;
     const calculatedTotal = Number((calculatedSubtotal + deliveryFee).toFixed(2));
 
     if (isDelivery) {
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
             name: 'Doorstep Delivery',
             description: 'Flat rate delivery to your location',
           },
-          unit_amount: 500, // £5.00 in pence (500)
+          unit_amount: 700, // £7.00 in pence (700)
         },
         quantity: 1,
       });

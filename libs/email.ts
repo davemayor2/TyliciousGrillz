@@ -134,7 +134,7 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
           // If order wasn't in Supabase, synthesize OrderData from Stripe Session
           if (!order) {
             const isCollection = session.metadata?.fulfillment === 'Collection';
-            const deliveryFee = isCollection ? 0 : 5.00;
+            const deliveryFee = isCollection ? 0 : 7.00;
             const grandTotal = (session.amount_total || 0) / 100;
             const subtotal = Math.max(0, Number((grandTotal - deliveryFee).toFixed(2)));
 
