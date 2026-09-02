@@ -135,7 +135,7 @@ export const FULL_MENU_DATA: MenuItem[] = [
     id: 'mixed-grill',
     name: 'Mixed Grill',
     description: 'Turkey, Lamb Chops & Lamb Ribs char-grilled and served with Fried Plantain & Chips.',
-    price: 1,
+    price: 35,
     image: '/images/lamb&beef.webp',
     category: 'lamb-beef',
     popular: true,
