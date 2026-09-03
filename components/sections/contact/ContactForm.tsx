@@ -14,15 +14,41 @@ export default function ContactForm() {
     message: '',
   });
 
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (status !== 'idle') setStatus('idle');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Thank you, ${formData.name}! Your message has been sent successfully.`);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setStatus('loading');
+    setStatusMessage('');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send message.');
+      }
+
+      setStatus('success');
+      setStatusMessage(`Thank you, ${formData.name}! Your message has been sent to our team at order@tyliciousgrillz.com. We'll be in touch shortly.`);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An error occurred while sending your message.';
+      setStatus('error');
+      setStatusMessage(msg);
+    }
   };
 
   const handleMouseEnter = () => {
@@ -161,21 +187,43 @@ export default function ContactForm() {
             />
           </div>
 
+          {/* Status Feedback Messages */}
+          {status === 'success' && (
+            <div className="mt-6 p-4 bg-[#E6F9EE] border-2 border-[#12B76A] rounded-2xl text-[#027A48] font-sans text-sm font-medium flex items-center gap-3">
+              <span className="text-xl">✅</span>
+              <span>{statusMessage}</span>
+            </div>
+          )}
+
+          {status === 'error' && (
+            <div className="mt-6 p-4 bg-[#FFF0F0] border-2 border-[#F04438] rounded-2xl text-[#D92D20] font-sans text-sm font-medium flex items-center gap-3">
+              <span className="text-xl">⚠️</span>
+              <span>{statusMessage}</span>
+            </div>
+          )}
+
           {/* Submit Button ("Contact Us") with fly-away paper plane micro-interaction */}
           <div className="mt-7 flex justify-start">
             <button
               type="submit"
+              disabled={status === 'loading'}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              className="inline-flex items-center justify-center h-12 bg-[#E63900] hover:bg-[#ff440a] text-white rounded-full pl-6 pr-2 font-sans font-bold text-base transition-colors duration-200 group select-none cursor-pointer border border-transparent shadow-none"
+              className={`inline-flex items-center justify-center h-12 ${
+                status === 'loading' ? 'bg-[#999999] cursor-not-allowed' : 'bg-[#E63900] hover:bg-[#ff440a] cursor-pointer'
+              } text-white rounded-full pl-6 pr-2 font-sans font-bold text-base transition-colors duration-200 group select-none border border-transparent shadow-none`}
             >
-              <span>Contact Us</span>
+              <span>{status === 'loading' ? 'Sending Message...' : 'Contact Us'}</span>
               <div className="ml-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shrink-0 overflow-hidden relative">
-                <div ref={iconRef} className="flex items-center justify-center">
-                  <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M23.38 2.71036C24.5654 2.29619 25.704 3.43486 25.2899 4.62019L18.3774 24.3719C17.9282 25.6529 16.1432 25.7252 15.5925 24.485L12.257 16.981L16.9517 12.2852C17.1063 12.1193 17.1904 11.8999 17.1864 11.6732C17.1824 11.4466 17.0906 11.2303 16.9303 11.07C16.7699 10.9096 16.5537 10.8178 16.327 10.8138C16.1003 10.8098 15.8809 10.894 15.715 11.0485L11.0192 15.7432L3.5152 12.4077C2.27503 11.8559 2.34853 10.072 3.62837 9.62286L23.38 2.71036Z" fill="#ED2C02"/>
-                  </svg>
-                </div>
+                {status === 'loading' ? (
+                  <div className="w-4 h-4 border-2 border-[#E63900] border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <div ref={iconRef} className="flex items-center justify-center">
+                    <svg width="18" height="18" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M23.38 2.71036C24.5654 2.29619 25.704 3.43486 25.2899 4.62019L18.3774 24.3719C17.9282 25.6529 16.1432 25.7252 15.5925 24.485L12.257 16.981L16.9517 12.2852C17.1063 12.1193 17.1904 11.8999 17.1864 11.6732C17.1824 11.4466 17.0906 11.2303 16.9303 11.07C16.7699 10.9096 16.5537 10.8178 16.327 10.8138C16.1003 10.8098 15.8809 10.894 15.715 11.0485L11.0192 15.7432L3.5152 12.4077C2.27503 11.8559 2.34853 10.072 3.62837 9.62286L23.38 2.71036Z" fill="#ED2C02"/>
+                    </svg>
+                  </div>
+                )}
               </div>
             </button>
           </div>

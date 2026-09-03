@@ -5,6 +5,8 @@ import { render } from '@react-email/components';
 import { supabaseAdmin } from '@/libs/supabase/server';
 import { OrderReceipt, OrderData, OrderItemData } from '@/emails/OrderReceipt';
 import { NewOrderAlert } from '@/emails/NewOrderAlert';
+import { ContactInquiryEmail, ContactInquiryData } from '@/emails/ContactInquiryEmail';
+import { CateringInquiryEmail, CateringInquiryData } from '@/emails/CateringInquiryEmail';
 
 const apiKey = process.env.RESEND_API_KEY;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -334,6 +336,132 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown email error';
     console.error('❌ Failed to process order notification emails:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Sends contact form inquiry directly to order@tyliciousgrillz.com
+ */
+export async function sendContactInquiryEmail(data: ContactInquiryData) {
+  if (!apiKey) {
+    console.error('❌ RESEND_API_KEY is not configured in environment variables.');
+    return { success: false, error: 'RESEND_API_KEY is missing' };
+  }
+
+  try {
+    const emailHtml = await render(
+      React.createElement(ContactInquiryEmail, { data })
+    );
+
+    // 1. Send inquiry notification to restaurant operational inbox (order@tyliciousgrillz.com)
+    const notificationRes = await resend.emails.send({
+      from: DEFAULT_FROM,
+      to: RESTAURANT_OPERATIONAL_EMAIL,
+      replyTo: data.email,
+      subject: `📬 New Contact Inquiry: ${data.subject} - from ${data.name}`,
+      html: emailHtml,
+    });
+
+    if (notificationRes.error) {
+      console.error('❌ Resend contact notification error:', notificationRes.error);
+      return { success: false, error: notificationRes.error.message };
+    }
+
+    // 2. Send friendly confirmation receipt to the customer
+    if (data.email && data.email.includes('@')) {
+      try {
+        await resend.emails.send({
+          from: DEFAULT_FROM,
+          to: data.email,
+          subject: 'We have received your message - Tylicious Grillz 🔥',
+          html: `
+            <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; background: #FFF5F3; border-radius: 16px; border: 2px solid #1A0500;">
+              <h2 style="color: #1A0500; margin-top: 0;">Hi ${data.name},</h2>
+              <p style="color: #444; font-size: 15px; line-height: 1.6;">Thank you for reaching out to <strong>Tylicious Grillz</strong>!</p>
+              <p style="color: #444; font-size: 15px; line-height: 1.6;">We have safely received your inquiry regarding <strong>"${data.subject}"</strong>. Our team is reviewing your message and will respond as quickly as possible.</p>
+              <div style="background: #FFFFFF; padding: 16px; border-radius: 12px; border: 1px solid #FF8A8A; margin: 20px 0;">
+                <p style="margin: 0; font-size: 13px; color: #666;"><strong>Your message:</strong></p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #2A0300; white-space: pre-wrap;">${data.message}</p>
+              </div>
+              <p style="color: #777; font-size: 13px; margin-bottom: 0;">Warm regards,<br><strong>The Tylicious Grillz Team</strong><br>order@tyliciousgrillz.com</p>
+            </div>
+          `,
+        });
+      } catch (custErr) {
+        console.warn('⚠️ Could not send contact confirmation to customer:', custErr);
+      }
+    }
+
+    return { success: true, id: notificationRes.data?.id };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('❌ Failed to process contact inquiry email:', msg);
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Sends catering inquiry directly to order@tyliciousgrillz.com
+ */
+export async function sendCateringInquiryEmail(data: CateringInquiryData) {
+  if (!apiKey) {
+    console.error('❌ RESEND_API_KEY is not configured in environment variables.');
+    return { success: false, error: 'RESEND_API_KEY is missing' };
+  }
+
+  try {
+    const emailHtml = await render(
+      React.createElement(CateringInquiryEmail, { data })
+    );
+
+    // 1. Send catering request to operational inbox (order@tyliciousgrillz.com)
+    const notificationRes = await resend.emails.send({
+      from: DEFAULT_FROM,
+      to: RESTAURANT_OPERATIONAL_EMAIL,
+      replyTo: data.email,
+      subject: `🍖 New Catering Inquiry: ${data.name} - ${data.date} (${data.guests} guests)`,
+      html: emailHtml,
+    });
+
+    if (notificationRes.error) {
+      console.error('❌ Resend catering notification error:', notificationRes.error);
+      return { success: false, error: notificationRes.error.message };
+    }
+
+    // 2. Send catering inquiry confirmation to client
+    if (data.email && data.email.includes('@')) {
+      try {
+        await resend.emails.send({
+          from: DEFAULT_FROM,
+          to: data.email,
+          subject: `Catering Inquiry Received (${data.date}) - Tylicious Grillz 🍖`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; background: #FFF5F3; border-radius: 16px; border: 2px solid #1A0500;">
+              <h2 style="color: #1A0500; margin-top: 0;">Hi ${data.name},</h2>
+              <p style="color: #444; font-size: 15px; line-height: 1.6;">Thank you for your event inquiry with <strong>Tylicious Grillz</strong>!</p>
+              <p style="color: #444; font-size: 15px; line-height: 1.6;">We have received your event details for <strong>${data.date}</strong> for approximately <strong>${data.guests} guests</strong>. Our event catering team is preparing a customized proposal and will reach out to you shortly via email or phone (${data.phone}).</p>
+              <div style="background: #FFFFFF; padding: 16px; border-radius: 12px; border: 1px solid #FF8A8A; margin: 20px 0;">
+                <p style="margin: 0 0 6px 0; font-size: 13px; color: #666;"><strong>Event Summary:</strong></p>
+                <p style="margin: 4px 0; font-size: 14px; color: #2A0300;">• <strong>Date:</strong> ${data.date}</p>
+                <p style="margin: 4px 0; font-size: 14px; color: #2A0300;">• <strong>Guests:</strong> ${data.guests}</p>
+                <p style="margin: 4px 0; font-size: 14px; color: #2A0300;">• <strong>Service Style:</strong> ${data.staffing || 'Standard'}</p>
+                ${data.address ? `<p style="margin: 4px 0; font-size: 14px; color: #2A0300;">• <strong>Location:</strong> ${data.address}</p>` : ''}
+                ${data.selectedMenu && data.selectedMenu.length > 0 ? `<p style="margin: 4px 0; font-size: 14px; color: #2A0300;">• <strong>Selected Menus:</strong> ${data.selectedMenu.join(', ')}</p>` : ''}
+              </div>
+              <p style="color: #777; font-size: 13px; margin-bottom: 0;">Warm regards,<br><strong>Tylicious Grillz Events Team</strong><br>order@tyliciousgrillz.com</p>
+            </div>
+          `,
+        });
+      } catch (custErr) {
+        console.warn('⚠️ Could not send catering confirmation to client:', custErr);
+      }
+    }
+
+    return { success: true, id: notificationRes.data?.id };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('❌ Failed to process catering inquiry email:', msg);
     return { success: false, error: msg };
   }
 }

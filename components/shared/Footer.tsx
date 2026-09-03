@@ -25,7 +25,7 @@ export default function Footer() {
               <div className="flex flex-col gap-2.5 font-sans text-sm text-white/80 leading-relaxed text-left">
                 <p>Phone: +44 7597 934557</p>
                 <p>Address: Meadow Road, DA 117LR. Gravesend</p>
-                <p>Email: info@tyliciousgrillz.com</p>
+                <p>Email: order@tyliciousgrillz.com</p>
               </div>
 
               {/* Service Focus Highlight */}
