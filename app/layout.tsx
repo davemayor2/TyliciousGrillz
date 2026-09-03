@@ -21,29 +21,32 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Tylicious Grillz | African BBQ Catering London, Kent & Essex | Grilled Seafood",
+  metadataBase: new URL('https://tyliciousgrillz.com'),
+  title: "Tylicious Grillz",
   description:
-    "Tylicious Grillz delivers premium African BBQ catering, Ghanaian wedding catering, and sizzling grilled seafood across London, Kent & Essex. Serving Gravesend, Dartford, Maidstone, Chatham, Grays, Basildon & more. Book your event today.",
+    "The premier grill spot serving London, Kent, Essex, Gravesend, and surrounding areas. Order fresh grilled fish, seafood, and mixed grill specials online today.",
   keywords: [
-    // Brand
+    // Brand & Local Restaurant Search
     "Tylicious Grillz",
+    "Tylicious Grillz restaurant",
     "Tylicious Grillz catering",
-    // Service types
-    "BBQ Catering London",
+    "grill spot London",
+    "grill restaurant Kent",
+    "grill spot Essex",
+    "grill spot Gravesend",
+    "fresh grilled fish London",
+    "grilled seafood London",
+    "mixed grill specials",
+    "order grilled food online",
+    "African BBQ Catering London",
     "BBQ Catering Kent",
     "BBQ Catering Essex",
-    "African BBQ Catering",
-    "Ghanaian Wedding Catering",
-    "Ghanaian event catering London",
-    "African food catering London",
-    "grilled fish London",
-    "grilled seafood London",
+    "BBQ catering Gravesend",
+    "BBQ catering Dartford",
+    "BBQ catering Maidstone",
     "seafood platter London",
-    "tilapia London",
+    "tilapia Gravesend",
     "croaker fish London",
-    "event catering Kent",
-    "event catering Essex",
-    "private event catering London",
     // London boroughs / areas
     "BBQ catering North London",
     "BBQ catering South London",
@@ -107,20 +110,27 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Tylicious Grillz | Premium African BBQ Catering – London, Kent & Essex",
+    title: "Tylicious Grillz",
     description:
-      "Premium African BBQ Catering & Grilled Seafood delivered fresh across London, Kent & Essex. Ghanaian wedding catering & private event specialists.",
-    images: ["/images/Gemini_Generated_Image_cibfydcibfydcibf.png"],
-    type: "website",
-    siteName: "Tylicious Grillz",
-    locale: "en_GB",
+      "The premier grill spot serving London, Kent, Essex, Gravesend, and surrounding areas. Order fresh grilled fish, seafood, and mixed grill specials online today.",
     url: "https://tyliciousgrillz.com",
+    siteName: "Tylicious Grillz",
+    images: [
+      {
+        url: "/images/Gemini_Generated_Image_cibfydcibfydcibf.png",
+        width: 1200,
+        height: 630,
+        alt: "Tylicious Grillz - Premier Grill Spot serving London, Kent, Essex & Gravesend",
+      },
+    ],
+    type: "website",
+    locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tylicious Grillz | African BBQ Catering London, Kent & Essex",
+    title: "Tylicious Grillz",
     description:
-      "Premium African BBQ Catering & Grilled Seafood across London, Kent & Essex.",
+      "The premier grill spot serving London, Kent, Essex, Gravesend, and surrounding areas. Order fresh grilled fish, seafood, and mixed grill specials online today.",
     images: ["/images/Gemini_Generated_Image_cibfydcibfydcibf.png"],
   },
   alternates: {
@@ -146,6 +156,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": ["FoodEstablishment", "CateringBusiness"],
               "name": "Tylicious Grillz",
+              "description": "The premier grill spot serving London, Kent, Essex, Gravesend, and surrounding areas. Order fresh grilled fish, seafood, and mixed grill specials online today.",
               "image": "https://tyliciousgrillz.com/images/Gemini_Generated_Image_cibfydcibfydcibf.png",
               "logo": "https://tyliciousgrillz.com/images/logo2.webp",
               "url": "https://tyliciousgrillz.com",
@@ -207,8 +218,7 @@ export default function RootLayout({
                 "https://www.facebook.com/Tyliciousgrillz",
                 "https://www.instagram.com/tyliciousgrillz",
                 "https://www.tiktok.com/@tyliciousgrillz"
-              ],
-              "description": "Tylicious Grillz offers premium African BBQ catering, Ghanaian wedding catering, and grilled seafood events across London, Kent & Essex. Specialising in private events, corporate catering, and pre-order delivery."
+              ]
             })
           }}
         />
