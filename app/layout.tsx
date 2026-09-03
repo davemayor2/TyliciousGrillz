@@ -100,13 +100,15 @@ export const metadata: Metadata = {
   authors: [{ name: "Tylicious Grillz" }],
   icons: {
     icon: [
-      { url: "/images/logo2.webp", type: "image/webp" },
-      { url: "/icon.webp", type: "image/webp" },
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-144x144.png", sizes: "144x144", type: "image/png" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
     ],
-    shortcut: "/images/logo2.webp",
+    shortcut: "/favicon.ico",
     apple: [
-      { url: "/images/logo2.webp", sizes: "180x180", type: "image/webp" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
   openGraph: {
@@ -146,8 +148,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <link rel="icon" href="/images/logo2.webp" type="image/webp" />
-        <link rel="apple-touch-icon" href="/images/logo2.webp" />
         {/* SEO local establishment Schema Markup (JSON-LD) */}
         <script
           type="application/ld+json"
