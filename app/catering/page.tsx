@@ -6,6 +6,7 @@ import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import Container from '@/components/shared/Container';
 import gsap from '@/libs/gsap';
+import { FULL_MENU_DATA } from '@/constants';
 
 export default function CateringPage() {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -146,12 +147,8 @@ export default function CateringPage() {
   };
 
   const menuChoices = [
-    'Grilled Tilapia Fish',
-    'Grilled Croaker Fish',
-    'Grilled Lamb Chops',
-    'Spicy Chicken Skewers',
-    'Sweet Potato Fries',
-    'Charcoal Grilled Sweetcorn',
+    ...FULL_MENU_DATA.map((item) => item.name),
+    'Tylicious BBQ Chicken Platter',
   ];
 
   return (
