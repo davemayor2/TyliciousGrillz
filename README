@@ -1,0 +1,57 @@
+# Tylicious Grillz
+
+A full-stack food ordering and restaurant storefront built with Next.js, React, and TypeScript.
+
+## Live Website
+
+https://www.tyliciousgrillz.com/
+
+## Project Overview
+
+I built Tylicious Grillz to provide customers with an interactive online food ordering experience. The project combines a responsive storefront with configurable menu items, basket management, and an online checkout flow.
+
+## Tech Stack
+
+- Next.js
+- React
+- TypeScript
+- GSAP
+- Supabase
+- Stripe
+
+## Key Features
+
+- Browse menu items and product categories.
+- Configure meals using available product options.
+- Add items to the basket and adjust quantities.
+- Remove items and review selected options.
+- View confirmation when adding items to the basket.
+- Complete online checkout using Stripe.
+- Store product and order-related data using Supabase.
+
+## Checkout Implementation
+
+Stripe checkout is implemented and has been tested end to end. The checkout flow integrates with the application's ordering process.
+
+## My Contribution
+
+I built the project from scratch, working across the frontend experience, application logic, database integration, and payment checkout flow.
+
+## Engineering Focus
+
+This project demonstrates my practical experience with React and Next.js application development, TypeScript, interactive UI behaviour, data integration, and payment workflows.
+
+## Repository
+
+Source code: https://github.com/davemayor2/TyliciousGrillz
+
+## Setup
+
+To run the project locally:
+
+1. Clone the repository.
+2. Install dependencies using the package manager indicated by the project lockfile.
+3. Configure the required environment variables for Supabase and Stripe.
+4. Run the development command defined in `package.json`.
+
+Refer to the project configuration and source code for the exact environment variable names and available scripts.
