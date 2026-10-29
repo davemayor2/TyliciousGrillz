@@ -133,7 +133,8 @@ export async function POST(request: NextRequest) {
             if (!existingOrder) {
               console.log('🔄 [Webhook] Order not in Supabase. Auto-inserting order from Stripe session...');
               const isCollection = metadata.fulfillment === 'Collection';
-              const deliveryFee = isCollection ? 0 : 7.00;
+              const rawDeliveryFee = metadata.deliveryFee || metadata.delivery_fee;
+              const deliveryFee = isCollection ? 0 : (rawDeliveryFee ? Number(rawDeliveryFee) : 0.00);
               const grandTotal = (session.amount_total || 0) / 100;
               const subtotal = Math.max(0, Number((grandTotal - deliveryFee).toFixed(2)));
 
@@ -143,6 +144,9 @@ export async function POST(request: NextRequest) {
                 customer_phone: customerPhone || null,
                 delivery_address: customerAddress,
                 fulfillment_method: metadata.fulfillment || 'Delivery',
+                delivery_type: deliveryMethod || (isCollection ? 'pickup' : 'delivery'),
+                delivery_distance_miles: metadata.deliveryDistance ? Number(metadata.deliveryDistance) : null,
+                delivery_rule_name: metadata.deliveryRule || null,
                 subtotal,
                 delivery_fee: deliveryFee,
                 total: grandTotal,

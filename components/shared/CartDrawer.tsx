@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { X, Trash2, Plus, Minus, Loader2, ChevronDown } from 'lucide-react';
 import { useCart, CartItem } from '../context/CartContext';
 import gsap from '@/libs/gsap';
+import DeliveryLocationSelector from './DeliveryLocationSelector';
 
 interface CartDrawerItemProps {
   item: CartItem;
@@ -187,6 +188,9 @@ export default function CartDrawer() {
     resetCheckout,
     fulfillmentMethod,
     setFulfillmentMethod,
+    deliveryQuote,
+    isCalculatingDelivery,
+    customerDetails,
   } = useCart();
 
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -472,7 +476,11 @@ export default function CartDrawer() {
                     <span className={`text-[10px] font-normal ${
                       fulfillmentMethod === 'Delivery' ? 'text-white/80' : 'text-[#888888]'
                     }`}>
-                      +£7.00
+                      {deliveryQuote && deliveryQuote.isEligible
+                        ? `+£${deliveryQuote.feeGBP.toFixed(2)}`
+                        : isCalculatingDelivery
+                        ? 'Calculating...'
+                        : 'By Distance'}
                     </span>
                   </button>
 
@@ -497,7 +505,14 @@ export default function CartDrawer() {
                 </div>
               </div>
 
-              {/* Pickup Address Info Box */}
+              {/* Delivery Address Selector (Shown when Delivery is chosen) */}
+              {fulfillmentMethod === 'Delivery' && (
+                <div className="w-full bg-[#FFF5F3] border-2 border-[#1A0500] rounded-2xl p-3 shadow-[3px_3px_0px_#1A0500]">
+                  <DeliveryLocationSelector />
+                </div>
+              )}
+
+              {/* Pickup Address Info Box (Shown when Collection is chosen) */}
               {fulfillmentMethod === 'Collection' && (
                 <div className="w-full bg-[#FFF5F3] border-2 border-[#1A0500] rounded-2xl py-3 px-4 shadow-[3px_3px_0px_#1A0500]">
                   <p className="font-sans font-bold text-xs text-[#ED2C02] uppercase tracking-wider mb-1">📍 Pickup Location</p>
@@ -519,9 +534,21 @@ export default function CartDrawer() {
                 <div className="flex justify-between">
                   <span>Delivery</span>
                   <span className={`font-semibold ${
-                    deliveryFee === 0 ? 'text-green-600' : 'text-[#1A0500]'
+                    fulfillmentMethod === 'Collection'
+                      ? 'text-green-600'
+                      : deliveryQuote && deliveryQuote.isEligible
+                      ? 'text-[#1A0500]'
+                      : 'text-[#888888]'
                   }`}>
-                    {deliveryFee === 0 ? 'Free' : `£${deliveryFee.toFixed(2)}`}
+                    {fulfillmentMethod === 'Collection'
+                      ? 'Free'
+                      : isCalculatingDelivery
+                      ? 'Calculating...'
+                      : deliveryQuote && deliveryQuote.isEligible
+                      ? `£${deliveryFee.toFixed(2)}`
+                      : deliveryQuote && !deliveryQuote.isEligible
+                      ? 'Outside Area'
+                      : 'Enter Address'}
                   </span>
                 </div>
                 <div className="border-t border-[#ED2C02]/20 my-1" />
@@ -532,26 +559,51 @@ export default function CartDrawer() {
               </div>
 
               {/* Primary Action Checkout Button */}
-              <button
-                onClick={handlePay}
-                disabled={isCheckingOut}
-                className="w-full h-12 bg-[#ED2C02] text-white rounded-full pl-5 pr-2 font-sans font-bold text-sm sm:text-base flex items-center justify-between border-2 border-[#1A0500] shadow-[3px_3px_0px_#1A0500] active:translate-y-0.5 active:shadow-[1px_1px_0px_#1A0500] transition-all cursor-pointer hover:bg-[#ff3b10] disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <span>{isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}</span>
-                <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shrink-0">
-                  {isCheckingOut ? (
-                    <Loader2 className="w-3.5 h-3.5 text-[#ED2C02] animate-spin" />
-                  ) : (
-                    <Image
-                      src="/order_now_arrow_orange.svg"
-                      alt="Arrow"
-                      width={15}
-                      height={15}
-                      className="w-3.5 h-3.5 object-contain"
-                    />
-                  )}
-                </div>
-              </button>
+              {(() => {
+                const hasDeliveryAddress = Boolean(
+                  customerDetails.delivery_address?.trim() || customerDetails.postcode?.trim()
+                );
+                const isDeliveryBlocked =
+                  fulfillmentMethod === 'Delivery' &&
+                  Boolean(
+                    isCalculatingDelivery ||
+                    !hasDeliveryAddress ||
+                    (deliveryQuote && !deliveryQuote.isEligible)
+                  );
+
+                const buttonText = isCheckingOut
+                  ? 'Processing...'
+                  : isCalculatingDelivery
+                  ? 'Calculating Route...'
+                  : fulfillmentMethod === 'Delivery' && !hasDeliveryAddress
+                  ? 'Enter Delivery Address'
+                  : fulfillmentMethod === 'Delivery' && deliveryQuote && !deliveryQuote.isEligible
+                  ? 'Address Outside Area'
+                  : 'Proceed to Checkout';
+
+                return (
+                  <button
+                    onClick={handlePay}
+                    disabled={Boolean(isCheckingOut || isDeliveryBlocked)}
+                    className="w-full h-12 bg-[#ED2C02] text-white rounded-full pl-5 pr-2 font-sans font-bold text-sm sm:text-base flex items-center justify-between border-2 border-[#1A0500] shadow-[3px_3px_0px_#1A0500] active:translate-y-0.5 active:shadow-[1px_1px_0px_#1A0500] transition-all cursor-pointer hover:bg-[#ff3b10] disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <span>{buttonText}</span>
+                    <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center shrink-0">
+                      {isCheckingOut || isCalculatingDelivery ? (
+                        <Loader2 className="w-3.5 h-3.5 text-[#ED2C02] animate-spin" />
+                      ) : (
+                        <Image
+                          src="/order_now_arrow_orange.svg"
+                          alt="Arrow"
+                          width={15}
+                          height={15}
+                          className="w-3.5 h-3.5 object-contain"
+                        />
+                      )}
+                    </div>
+                  </button>
+                );
+              })()}
             </div>
           )}
 

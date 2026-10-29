@@ -47,6 +47,11 @@ export interface CartContextType {
   checkoutStatus: 'idle' | 'processing' | 'success' | 'error';
   errorMessage: string | null;
 
+  // Dynamic Delivery Quote State
+  deliveryQuote: import('@/types/delivery').DeliveryQuote | null;
+  isCalculatingDelivery: boolean;
+  deliveryError: string | null;
+
   // 2. Actions
   addItem: (item: {
     product_id: string | number;
@@ -67,6 +72,7 @@ export interface CartContextType {
   setIsCartOpen: (open: boolean) => void;
   setFulfillmentMethod: (method: 'Delivery' | 'Collection') => void;
   setCustomerDetails: (details: Partial<CustomerDetails>) => void;
+  calculateDeliveryQuote: (address: string, postcode?: string) => Promise<import('@/types/delivery').DeliveryQuote | null>;
   handleCheckout: (overrides?: Partial<CustomerDetails>) => Promise<void>;
   resetCheckout: () => void;
 
@@ -113,6 +119,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     scheduled_time: '',
   });
   const [isDeliveryEligible, setIsDeliveryEligible] = useState<boolean | null>(null);
+  const [deliveryQuote, setDeliveryQuote] = useState<import('@/types/delivery').DeliveryQuote | null>(null);
+  const [isCalculatingDelivery, setIsCalculatingDelivery] = useState(false);
+  const [deliveryError, setDeliveryError] = useState<string | null>(null);
   const [checkoutStatus, setCheckoutStatus] = useState<CartContextType['checkoutStatus']>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -168,8 +177,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   const deliveryFee = useMemo(() => {
-    return fulfillmentMethod === 'Delivery' ? 7.00 : 0.00;
-  }, [fulfillmentMethod]);
+    if (fulfillmentMethod === 'Collection') return 0.00;
+    return deliveryQuote && deliveryQuote.isEligible ? deliveryQuote.feeGBP : 0.00;
+  }, [fulfillmentMethod, deliveryQuote]);
 
   const cartTotal = useMemo(() => {
     return Number((cartSubtotal + deliveryFee).toFixed(2));
@@ -308,6 +318,61 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCustomerDetailsState((prev) => ({ ...prev, ...details }));
   }, []);
 
+  // Calculate Dynamic Location-Based Delivery Quote
+  const calculateDeliveryQuote = useCallback(async (address: string, postcode?: string) => {
+    const cleanAddr = (address || '').trim();
+    const cleanPc = (postcode || '').trim();
+
+    if (!cleanAddr && !cleanPc) {
+      setDeliveryQuote(null);
+      setDeliveryError(null);
+      setIsDeliveryEligible(null);
+      return null;
+    }
+
+    setIsCalculatingDelivery(true);
+    setDeliveryError(null);
+
+    try {
+      const res = await fetch('/api/delivery/quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: cleanAddr, postcode: cleanPc }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.quote) {
+        const errorMsg = data.error || 'Unable to calculate delivery to this address.';
+        setDeliveryQuote(null);
+        setDeliveryError(errorMsg);
+        setIsDeliveryEligible(false);
+        return null;
+      }
+
+      const quote: import('@/types/delivery').DeliveryQuote = data.quote;
+      setDeliveryQuote(quote);
+      setIsDeliveryEligible(quote.isEligible);
+
+      if (!quote.isEligible) {
+        setDeliveryError(
+          quote.message || `Address is outside our maximum delivery radius (${quote.maxDistanceMiles} miles).`
+        );
+      } else {
+        setDeliveryError(null);
+      }
+
+      return quote;
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Network error calculating delivery route.';
+      setDeliveryQuote(null);
+      setDeliveryError(errorMsg);
+      setIsDeliveryEligible(false);
+      return null;
+    } finally {
+      setIsCalculatingDelivery(false);
+    }
+  }, []);
+
   // Postcode Validator
   const validatePostcode = useCallback((code: string) => {
     const cleaned = code.toUpperCase().replace(/\s+/g, '');
@@ -321,13 +386,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const handleCheckout = useCallback(async (overrides?: Partial<CustomerDetails>) => {
     if (items.length === 0) return;
 
-    setCheckoutStatus('processing');
-    setErrorMessage(null);
-
     const mergedCustomer = {
       ...customerDetails,
       ...overrides,
     };
+
+    // Client-side guard for delivery orders
+    if (fulfillmentMethod === 'Delivery') {
+      const rawAddr = mergedCustomer.delivery_address?.trim() || '';
+      const rawPc = mergedCustomer.postcode?.trim() || '';
+
+      if (!rawAddr && !rawPc) {
+        setErrorMessage('Please enter your delivery address to proceed.');
+        setCheckoutStatus('error');
+        return;
+      }
+
+      if (deliveryQuote && !deliveryQuote.isEligible) {
+        setErrorMessage(
+          deliveryQuote.message ||
+            `Address is outside our maximum delivery boundary (${deliveryQuote.maxDistanceMiles} miles).`
+        );
+        setCheckoutStatus('error');
+        return;
+      }
+    }
+
+    setCheckoutStatus('processing');
+    setErrorMessage(null);
 
     const checkoutPayload = {
       customer_details: {
@@ -376,7 +462,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setErrorMessage(msg);
       setCheckoutStatus('error');
     }
-  }, [items, customerDetails, fulfillmentMethod, cartSubtotal, deliveryFee]);
+  }, [items, customerDetails, fulfillmentMethod, cartSubtotal, deliveryFee, deliveryQuote]);
 
   const resetCheckout = useCallback(() => {
     setCheckoutStatus('idle');
@@ -431,6 +517,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         checkoutStatus,
         errorMessage,
 
+        // Dynamic Delivery Quote State
+        deliveryQuote,
+        isCalculatingDelivery,
+        deliveryError,
+
         // Actions
         addItem,
         removeItem,
@@ -441,6 +532,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsCartOpen,
         setFulfillmentMethod,
         setCustomerDetails,
+        calculateDeliveryQuote,
         handleCheckout,
         resetCheckout,
 

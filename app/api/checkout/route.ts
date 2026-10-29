@@ -108,18 +108,53 @@ export async function POST(request: NextRequest) {
 
     // Delivery calculation
     const isDelivery = fulfillment !== 'Collection';
-    const deliveryFee = isDelivery ? 7.00 : 0.00;
-    const calculatedTotal = Number((calculatedSubtotal + deliveryFee).toFixed(2));
+    let deliveryFee = 0.00;
+    let deliveryQuote: import('@/types/delivery').DeliveryQuote | null = null;
 
     if (isDelivery) {
+      if (!deliveryAddress && !postcode) {
+        return NextResponse.json(
+          { error: 'Please provide a valid UK delivery address or postcode to proceed.' },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const { calculateDeliveryQuoteForAddress } = await import('@/libs/delivery/pricing');
+        deliveryQuote = await calculateDeliveryQuoteForAddress(deliveryAddress, postcode);
+
+        if (!deliveryQuote.isEligible) {
+          return NextResponse.json(
+            {
+              error:
+                deliveryQuote.message ||
+                `Delivery address is outside our maximum delivery radius (${deliveryQuote.maxDistanceMiles} miles). Please choose Collection or contact us for catering.`,
+            },
+            { status: 400 }
+          );
+        }
+
+        deliveryFee = deliveryQuote.feeGBP;
+      } catch (quoteErr: unknown) {
+        const errMsg = quoteErr instanceof Error ? quoteErr.message : 'Could not verify delivery address.';
+        return NextResponse.json(
+          { error: errMsg },
+          { status: 400 }
+        );
+      }
+    }
+
+    const calculatedTotal = Number((calculatedSubtotal + deliveryFee).toFixed(2));
+
+    if (isDelivery && deliveryQuote) {
       line_items.push({
         price_data: {
           currency: 'gbp',
           product_data: {
-            name: 'Doorstep Delivery',
-            description: 'Flat rate delivery to your location',
+            name: `Doorstep Delivery (${deliveryQuote.distanceMiles} miles)`,
+            description: `Delivery from Gravesend kitchen to ${deliveryQuote.destinationAddress} (${deliveryQuote.ruleName})`,
           },
-          unit_amount: 700, // £7.00 in pence (700)
+          unit_amount: deliveryQuote.feeMinorUnits, // exact integer pence for Stripe (e.g. £5.50 -> 550)
         },
         quantity: 1,
       });
@@ -129,7 +164,8 @@ export async function POST(request: NextRequest) {
     // 1. SUPABASE: INSERT new row into 'orders' table (pending status)
     // -----------------------------------------------------------------
     let supabaseOrderId: string | number | null = null;
-    const fullAddress = deliveryAddress || (postcode ? `Postcode: ${postcode}` : null);
+    const finalDeliveryAddress = deliveryQuote?.destinationAddress || deliveryAddress || (postcode ? `Postcode: ${postcode}` : null);
+    const finalPostcode = deliveryQuote?.destinationPostcode || postcode || null;
 
     if (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.NEXT_PUBLIC_SUPABASE_URL) {
       try {
@@ -137,9 +173,15 @@ export async function POST(request: NextRequest) {
           customer_name: customerName || null,
           customer_email: customerEmail || null,
           customer_phone: customerPhone || null,
-          delivery_address: fullAddress,
+          delivery_address: finalDeliveryAddress,
           fulfillment_method: fulfillment,
           delivery_type: deliveryMethod,
+          delivery_distance_miles: deliveryQuote ? deliveryQuote.distanceMiles : null,
+          delivery_distance_unit: 'miles',
+          delivery_rule_name: deliveryQuote ? deliveryQuote.ruleName : null,
+          delivery_latitude: deliveryQuote?.destinationCoordinates?.lat || null,
+          delivery_longitude: deliveryQuote?.destinationCoordinates?.lng || null,
+          delivery_postcode: finalPostcode,
           subtotal: calculatedSubtotal,
           delivery_fee: deliveryFee,
           total: calculatedTotal,
@@ -154,14 +196,14 @@ export async function POST(request: NextRequest) {
           .select('id')
           .single();
 
-        // If insert failed (e.g. delivery_type or receipt_sent columns not in Supabase schema), fallback to baseline core columns
+        // If insert failed (e.g. optional columns not in Supabase schema yet), fallback to core baseline columns
         if (insertRes.error) {
           console.warn('⚠️ Supabase full orders insert notice:', insertRes.error.message, 'Retrying with core columns...');
           const coreInsertPayload: Record<string, unknown> = {
             customer_name: customerName || null,
             customer_email: customerEmail || null,
             customer_phone: customerPhone || null,
-            delivery_address: fullAddress,
+            delivery_address: finalDeliveryAddress,
             fulfillment_method: fulfillment,
             subtotal: calculatedSubtotal,
             delivery_fee: deliveryFee,
@@ -295,8 +337,11 @@ export async function POST(request: NextRequest) {
         order_id: supabaseOrderId ? String(supabaseOrderId) : '',
         fulfillment,
         delivery_method: deliveryMethod,
-        postcode,
-        deliveryAddress: deliveryAddress || postcode,
+        postcode: finalPostcode || '',
+        deliveryAddress: finalDeliveryAddress || '',
+        deliveryFee: deliveryFee.toFixed(2),
+        deliveryDistance: deliveryQuote ? String(deliveryQuote.distanceMiles) : '0',
+        deliveryRule: deliveryQuote?.ruleName || '',
         scheduledDate,
         scheduledTime,
         itemCount: String(items.length),

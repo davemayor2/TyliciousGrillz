@@ -88,7 +88,8 @@ export async function POST(request: NextRequest) {
 
           if (stripeSession) {
             const isCollection = stripeSession.metadata?.fulfillment === 'Collection';
-            const deliveryFee = isCollection ? 0 : 7.00;
+            const rawDeliveryFee = stripeSession.metadata?.deliveryFee || stripeSession.metadata?.delivery_fee;
+            const deliveryFee = isCollection ? 0 : (rawDeliveryFee ? Number(rawDeliveryFee) : 0.00);
             const grandTotal = (stripeSession.amount_total || 0) / 100;
             const subtotal = Math.max(0, Number((grandTotal - deliveryFee).toFixed(2)));
 
@@ -113,6 +114,8 @@ export async function POST(request: NextRequest) {
               customer_phone: customerPhone,
               delivery_address: stripeAddress,
               fulfillment_method: stripeSession.metadata?.fulfillment || 'Delivery',
+              delivery_distance_miles: stripeSession.metadata?.deliveryDistance ? Number(stripeSession.metadata.deliveryDistance) : null,
+              delivery_rule_name: stripeSession.metadata?.deliveryRule || null,
               subtotal,
               delivery_fee: deliveryFee,
               total: grandTotal,
