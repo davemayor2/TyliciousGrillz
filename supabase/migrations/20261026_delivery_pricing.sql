@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public.delivery_settings (
     restaurant_postcode TEXT NOT NULL DEFAULT 'DA11 7LR',
     restaurant_lat NUMERIC(9,6) NOT NULL DEFAULT 51.4414,
     restaurant_lng NUMERIC(9,6) NOT NULL DEFAULT 0.3708,
-    max_delivery_distance_miles NUMERIC(6,2) NOT NULL DEFAULT 35.0,
+    max_delivery_distance_miles NUMERIC(6,2) NOT NULL DEFAULT 75.0,
     distance_unit TEXT NOT NULL DEFAULT 'miles',
     currency TEXT NOT NULL DEFAULT 'GBP',
     is_active BOOLEAN NOT NULL DEFAULT true,
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.delivery_pricing_rules (
     rule_name TEXT NOT NULL,
     zone_code TEXT,
     min_distance_miles NUMERIC(6,2) NOT NULL DEFAULT 0,
-    max_distance_miles NUMERIC(6,2) NOT NULL DEFAULT 35.0,
+    max_distance_miles NUMERIC(6,2) NOT NULL DEFAULT 75.0,
     fee_gbp NUMERIC(10,2) NOT NULL,
     per_mile_fee_gbp NUMERIC(10,2) NOT NULL DEFAULT 0.00,
     pricing_type TEXT NOT NULL DEFAULT 'zone' CHECK (pricing_type IN ('band', 'per_mile', 'zone')),
@@ -88,15 +88,15 @@ SELECT
     'DA11 7LR',
     51.4414,
     0.3708,
-    35.0,
+    75.0,
     'miles',
     'GBP',
     true
 WHERE NOT EXISTS (SELECT 1 FROM public.delivery_settings);
 
 UPDATE public.delivery_settings 
-SET max_delivery_distance_miles = 35.0 
-WHERE max_delivery_distance_miles < 35.0;
+SET max_delivery_distance_miles = 75.0 
+WHERE max_delivery_distance_miles < 75.0;
 
 -- 7. Seed / Upsert Location-Grouped UK Postcode Delivery Zones (GBP £)
 
@@ -111,7 +111,9 @@ ON CONFLICT (zone_code) DO UPDATE SET
     rule_name = EXCLUDED.rule_name,
     fee_gbp = EXCLUDED.fee_gbp,
     postcode_prefixes = EXCLUDED.postcode_prefixes,
-    coverage_areas = EXCLUDED.coverage_areas;
+    coverage_areas = EXCLUDED.coverage_areas,
+    min_distance_miles = EXCLUDED.min_distance_miles,
+    max_distance_miles = EXCLUDED.max_distance_miles;
 
 -- Zone 2: Ebbsfleet, Swanscombe & Greenhithe (DA9, DA10)
 INSERT INTO public.delivery_pricing_rules (
@@ -124,7 +126,9 @@ ON CONFLICT (zone_code) DO UPDATE SET
     rule_name = EXCLUDED.rule_name,
     fee_gbp = EXCLUDED.fee_gbp,
     postcode_prefixes = EXCLUDED.postcode_prefixes,
-    coverage_areas = EXCLUDED.coverage_areas;
+    coverage_areas = EXCLUDED.coverage_areas,
+    min_distance_miles = EXCLUDED.min_distance_miles,
+    max_distance_miles = EXCLUDED.max_distance_miles;
 
 -- Zone 3: Dartford, Bexley & Medway West (DA1, DA2, DA4, DA5, ME1, ME2, ME3)
 INSERT INTO public.delivery_pricing_rules (
@@ -137,20 +141,24 @@ ON CONFLICT (zone_code) DO UPDATE SET
     rule_name = EXCLUDED.rule_name,
     fee_gbp = EXCLUDED.fee_gbp,
     postcode_prefixes = EXCLUDED.postcode_prefixes,
-    coverage_areas = EXCLUDED.coverage_areas;
+    coverage_areas = EXCLUDED.coverage_areas,
+    min_distance_miles = EXCLUDED.min_distance_miles,
+    max_distance_miles = EXCLUDED.max_distance_miles;
 
 -- Zone 4: Medway Towns, Outer Kent & SE London Borders
 INSERT INTO public.delivery_pricing_rules (
     rule_name, zone_code, min_distance_miles, max_distance_miles, fee_gbp, per_mile_fee_gbp, pricing_type, postcode_prefixes, coverage_areas, description, is_active, sort_order
 )
 VALUES (
-    'Zone 4: Medway Towns, Outer Kent & SE London Borders', 'ZONE_4_MEDWAY_SE_LONDON', 10, 15, 10.00, 0.00, 'zone', 'DA6, DA7, DA8, DA14, DA15, DA16, DA17, ME4, ME5, ME7, ME8, BR1, BR2, BR5, BR6, BR7, BR8, SE2, SE9, SE18, SE28', 'Chatham, Gillingham, Rainham (Kent), Bexleyheath, Sidcup, Welling, Erith, Bromley, Abbey Wood, Thamesmead, Woolwich, Eltham', 'Medway Towns, Bromley, Bexleyheath & South-East London borders', true, 4
+    'Zone 4: Medway Towns, Outer Kent & SE London Borders', 'ZONE_4_MEDWAY_SE_LONDON', 10, 15, 10.00, 0.00, 'zone', 'DA6, DA7, DA8, DA14, DA15, DA16, DA17, DA18, ME4, ME5, ME7, ME8, BR1, BR2, BR5, BR6, BR7, BR8, SE2, SE9, SE18, SE28', 'Chatham, Gillingham, Rainham (Kent), Bexleyheath, Sidcup, Welling, Erith, Bromley, Abbey Wood, Thamesmead, Woolwich, Eltham', 'Medway Towns, Bromley, Bexleyheath & South-East London borders', true, 4
 )
 ON CONFLICT (zone_code) DO UPDATE SET
     rule_name = EXCLUDED.rule_name,
     fee_gbp = EXCLUDED.fee_gbp,
     postcode_prefixes = EXCLUDED.postcode_prefixes,
-    coverage_areas = EXCLUDED.coverage_areas;
+    coverage_areas = EXCLUDED.coverage_areas,
+    min_distance_miles = EXCLUDED.min_distance_miles,
+    max_distance_miles = EXCLUDED.max_distance_miles;
 
 -- Zone 5: Inner London Borders, South Essex & Mid Kent
 INSERT INTO public.delivery_pricing_rules (
@@ -169,25 +177,50 @@ ON CONFLICT (zone_code) DO UPDATE SET
     rule_name = EXCLUDED.rule_name,
     fee_gbp = EXCLUDED.fee_gbp,
     postcode_prefixes = EXCLUDED.postcode_prefixes,
-    coverage_areas = EXCLUDED.coverage_areas;
+    coverage_areas = EXCLUDED.coverage_areas,
+    min_distance_miles = EXCLUDED.min_distance_miles,
+    max_distance_miles = EXCLUDED.max_distance_miles;
 
-DELETE FROM public.delivery_pricing_rules WHERE zone_code = 'ZONE_5_EXTENDED';
+DELETE FROM public.delivery_pricing_rules WHERE zone_code IN ('ZONE_5_EXTENDED', 'ZONE_6_WIDER_LONDON_ESSEX');
 
--- Zone 6: Wider London & Essex County
+-- Zone 6: Greater London & Mid Essex / Mid Kent
 INSERT INTO public.delivery_pricing_rules (
     rule_name, zone_code, min_distance_miles, max_distance_miles, fee_gbp, per_mile_fee_gbp, pricing_type, postcode_prefixes, coverage_areas, description, is_active, sort_order
 )
 VALUES (
-    'Zone 6: Wider London & Essex County', 
-    'ZONE_6_WIDER_LONDON_ESSEX', 
-    25, 35, 20.00, 0.00, 'zone', 
-    'E1, E2, E3, E7, E8, E9, E10, E11, E12, E15, E17, E18, E20, SE1, SE4, SE5, SE11, SE15, SE16, SE17, SE19, SE20, SE21, SE22, SE23, SE24, SE25, SE26, SE27, CR0, CR2, CR7, CR8, RM1, RM2, RM3, RM4, RM5, RM6, RM7, RM8, RM9, RM10, RM11, RM12, IG1, IG2, IG3, IG4, IG5, IG6, IG7, IG8, CM11, CM12, CM13, CM14, CM15, SS0, SS1, SS2, SS3, SS7, SS8, SS9, SS11, SS12, SS13, SS14, SS15, SS16', 
-    'Romford, Dagenham, Hornchurch, Ilford, Brentwood, Billericay, Basildon, Wickford, Benfleet, Canvey Island, Southend-on-Sea, Stratford, Hackney, Bow, Walthamstow, Central/Southwark, Peckham, Brixton, Croydon', 
-    'Extended delivery across Greater London and Essex county', 
+    'Zone 6: Greater London & Mid Essex / Mid Kent', 
+    'ZONE_6_GREATER_LONDON_MID_ESSEX_KENT', 
+    25, 40, 20.00, 0.00, 'zone', 
+    'EC1, EC2, EC3, EC4, WC1, WC2, W1, SW1, SE1, E1, E2, E3, E4, E5, E7, E8, E9, E10, E11, E12, E15, E17, E18, E20, E1W, N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14, N15, N16, N17, N18, N19, N20, N21, N22, NW1, NW2, NW3, NW4, NW5, NW6, NW7, NW8, NW9, NW10, NW11, SE4, SE5, SE11, SE15, SE16, SE17, SE19, SE20, SE21, SE22, SE23, SE24, SE25, SE26, SE27, SW2, SW3, SW4, SW5, SW6, SW7, SW8, SW9, SW10, SW11, SW12, SW13, SW14, SW15, SW16, SW17, SW18, SW19, SW20, CR0, CR2, CR4, CR7, CR8, SM1, SM2, SM3, SM4, SM5, SM6, SM7, W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12, W13, W14, TW1, TW2, TW3, TW7, TW8, TW9, TW10, UB1, UB2, UB3, UB4, UB5, UB6, HA0, HA1, HA9, RM1, RM2, RM3, RM4, RM5, RM6, RM7, RM8, RM9, RM10, RM11, RM12, IG1, IG2, IG3, IG4, IG5, IG6, IG7, IG8, IG9, IG10, CM16, CM11, CM12, CM13, CM14, CM15, SS0, SS1, SS2, SS3, SS4, SS5, SS6, SS7, SS8, SS9, SS11, SS12, SS13, SS14, SS15, SS16, ME9, ME10, ME11, ME12, ME13, TN9, TN10, TN11, TN12, TN1, TN2, TN3, TN4', 
+    'Central London, North London, East London, South London, West London, Romford, Dagenham, Ilford, Brentwood, Billericay, Basildon, Wickford, Southend-on-Sea, Rayleigh, Rochford, Epping, Loughton, Sittingbourne, Faversham, Tonbridge, Tunbridge Wells', 
+    'Greater London and mid Essex/Kent areas', 
     true, 6
 )
 ON CONFLICT (zone_code) DO UPDATE SET
     rule_name = EXCLUDED.rule_name,
     fee_gbp = EXCLUDED.fee_gbp,
     postcode_prefixes = EXCLUDED.postcode_prefixes,
-    coverage_areas = EXCLUDED.coverage_areas;
+    coverage_areas = EXCLUDED.coverage_areas,
+    min_distance_miles = EXCLUDED.min_distance_miles,
+    max_distance_miles = EXCLUDED.max_distance_miles;
+
+-- Zone 7: Regional Kent & Essex Event / Catering Delivery
+INSERT INTO public.delivery_pricing_rules (
+    rule_name, zone_code, min_distance_miles, max_distance_miles, fee_gbp, per_mile_fee_gbp, pricing_type, postcode_prefixes, coverage_areas, description, is_active, sort_order
+)
+VALUES (
+    'Zone 7: Regional Kent & Essex Event / Catering Delivery', 
+    'ZONE_7_REGIONAL_KENT_ESSEX', 
+    40, 75, 25.00, 0.00, 'zone', 
+    'CT1, CT2, CT3, CT4, CT5, CT6, CT7, CT8, CT9, CT10, CT11, CT12, CT13, CT14, CT15, CT16, CT17, CT18, CT19, CT20, CT21, TN23, TN24, TN25, TN26, TN27, TN17, TN18, TN28, TN29, CM1, CM2, CM3, CM6, CM7, CM77, CM8, CM9, CM17, CM18, CM19, CM20, CO1, CO2, CO3, CO4, CO5, CO6, CO7, CO11, CO12, CO13, CO14, CO15, CO16, UB7, UB8, UB9, UB10, TW4, TW5, TW6, TW11, TW12, TW13, TW14, TW15, TW18, TW19, TW20, HA2, HA3, HA4, HA5, HA6, HA7, HA8, EN1, EN2, EN3, EN4, EN5, EN7, EN8, EN9, EN10, EN11', 
+    'Canterbury, Ashford, Thanet, Margate, Ramsgate, Folkestone, Dover, Deal, Chelmsford, Harlow, Braintree, Colchester, Maldon, Outer West/North London', 
+    'Regional Kent, Essex and extended London catering & event delivery', 
+    true, 7
+)
+ON CONFLICT (zone_code) DO UPDATE SET
+    rule_name = EXCLUDED.rule_name,
+    fee_gbp = EXCLUDED.fee_gbp,
+    postcode_prefixes = EXCLUDED.postcode_prefixes,
+    coverage_areas = EXCLUDED.coverage_areas,
+    min_distance_miles = EXCLUDED.min_distance_miles,
+    max_distance_miles = EXCLUDED.max_distance_miles;

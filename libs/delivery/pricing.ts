@@ -109,7 +109,7 @@ export async function getDeliverySettings(): Promise<DeliverySettings> {
   return DEFAULT_DELIVERY_SETTINGS;
 }
 
-import { extractOutcode } from '@/constants/delivery';
+import { extractOutcode, findDeliveryZoneByOutcode } from '@/constants/delivery';
 
 /**
  * Calculates delivery fee given postcode and distance
@@ -124,16 +124,13 @@ export function matchDeliveryRule(
   if (postcode) {
     const outcode = extractOutcode(postcode);
     if (outcode) {
-      for (const rule of rules) {
-        if (!rule.is_active) continue;
-        const prefixes = rule.postcode_prefixes || [];
-        if (prefixes.some((p) => p.toUpperCase() === outcode)) {
-          return {
-            matchedRule: rule,
-            calculatedFeeGBP: Number(rule.fee_gbp.toFixed(2)),
-            isEligible: true,
-          };
-        }
+      const matched = findDeliveryZoneByOutcode(outcode, rules);
+      if (matched) {
+        return {
+          matchedRule: matched,
+          calculatedFeeGBP: Number(matched.fee_gbp.toFixed(2)),
+          isEligible: true,
+        };
       }
     }
   }
