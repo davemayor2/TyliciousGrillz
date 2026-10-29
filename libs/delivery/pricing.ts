@@ -39,6 +39,16 @@ export async function getActiveDeliveryPricingRules(): Promise<DeliveryPricingRu
           per_mile_fee_gbp: Number(r.per_mile_fee_gbp || 0),
           pricing_type: r.pricing_type || 'band',
           zone_code: r.zone_code,
+          postcode_prefixes:
+            typeof r.postcode_prefixes === 'string'
+              ? r.postcode_prefixes
+                  .split(',')
+                  .map((s: string) => s.trim().toUpperCase())
+                  .filter(Boolean)
+              : Array.isArray(r.postcode_prefixes)
+              ? r.postcode_prefixes
+              : [],
+          coverage_areas: r.coverage_areas,
           is_active: r.is_active !== false,
           sort_order: r.sort_order ?? 0,
           description: r.description,
@@ -245,7 +255,7 @@ export async function calculateDeliveryQuoteForAddress(
       destinationPostcode: targetPostcode,
       destinationCoordinates: geocode.coordinates,
       durationMinutes,
-      message: `We currently deliver to London, Kent & Essex across Gravesend, Dartford, Medway, Bexley, Bromley, SE London & Thurrock. Your location is outside our standard delivery zones. Please choose Free Collection or contact us for catering.`,
+      message: `We currently deliver across Gravesend, Kent, London and Essex (Zones 1 to 6). Your location is outside our standard delivery zones. Please choose Free Collection or contact us for bespoke catering delivery.`,
       maxDistanceMiles: settings.max_delivery_distance_miles,
       provider: route.provider,
     };
