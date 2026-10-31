@@ -127,8 +127,13 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
     // 2. STRIPE LINE ITEMS FALLBACK & ENHANCEMENT:
     // If order_items are empty or order is missing from Supabase,
     // load line items & metadata directly from Stripe Checkout Session
-    // -----------------------------------------------------------------
-    if (stripe && stripeSessionId) {
+    const needsStripeLookup =
+      !order ||
+      !order.customer_email ||
+      !order.delivery_address ||
+      orderItems.length === 0;
+
+    if (stripe && stripeSessionId && needsStripeLookup) {
       try {
         const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
 
@@ -267,69 +272,123 @@ export async function sendOrderNotifications(orderIdOrSessionId: string | number
 
     const orderData = order as OrderData;
 
-    console.log(`📧 Pre-rendering HTML templates for Order #${orderData.id} (${orderItems.length} items: ${orderItems.map(i => i.product_name).join(', ') || 'None'}, Total: £${orderData.total})...`);
+    console.log(`📧 Fast-rendering and prioritizing emails for Order #${orderData.id} (${orderItems.length} items, Total: £${orderData.total})...`);
 
-    // 3. Pre-render React Email templates to static HTML strings
-    const receiptHtml = await render(
-      React.createElement(OrderReceipt, {
-        order: orderData,
-        order_items: orderItems,
-      })
-    );
-
-    const alertHtml = await render(
-      React.createElement(NewOrderAlert, {
-        order: orderData,
-        order_items: orderItems,
-      })
-    );
+    // 3. Parallel Pre-render: Generate HTML & Plain Text simultaneously
+    const [receiptHtml, receiptText, alertHtml, alertText] = await Promise.all([
+      render(
+        React.createElement(OrderReceipt, {
+          order: orderData,
+          order_items: orderItems,
+        })
+      ),
+      render(
+        React.createElement(OrderReceipt, {
+          order: orderData,
+          order_items: orderItems,
+        }),
+        { plainText: true }
+      ).catch(() => undefined),
+      render(
+        React.createElement(NewOrderAlert, {
+          order: orderData,
+          order_items: orderItems,
+        })
+      ),
+      render(
+        React.createElement(NewOrderAlert, {
+          order: orderData,
+          order_items: orderItems,
+        }),
+        { plainText: true }
+      ).catch(() => undefined),
+    ]);
 
     const results: { customer?: unknown; staff?: unknown } = {};
 
-    // 4. Send Customer Order Receipt
-    if (orderData.customer_email && orderData.customer_email.includes('@')) {
-      try {
-        const custRes = await resend.emails.send({
-          from: DEFAULT_FROM,
-          to: orderData.customer_email,
-          subject: `Order Confirmed #${orderData.id} - Tylicious Grillz 🔥`,
-          html: receiptHtml,
-        });
+    // 4. Concurrently Dispatch Customer Receipt & Kitchen Alert (Zero Sequential Blocking)
+    const priorityHeaders = {
+      'X-Entity-Ref-ID': `order-${orderData.id}-${Date.now()}`,
+      'X-Priority': '1',
+      'Priority': 'urgent',
+      'Importance': 'high',
+    };
 
-        if (custRes.error) {
-          console.error('❌ Resend customer receipt error:', custRes.error);
-          results.customer = { error: custRes.error };
-        } else {
-          console.log(`✅ Order receipt emailed to customer: ${orderData.customer_email} (ID: ${custRes.data?.id})`);
-          results.customer = { success: true, id: custRes.data?.id };
-        }
-      } catch (custErr) {
-        console.error('❌ Exception sending customer receipt:', custErr);
-        results.customer = { error: custErr };
-      }
+    const sendTasks: Promise<{ type: 'customer' | 'staff'; success: boolean; data?: unknown; error?: unknown }>[] = [];
+
+    // Prioritized Customer Receipt Task
+    if (orderData.customer_email && orderData.customer_email.includes('@')) {
+      sendTasks.push(
+        resend.emails
+          .send({
+            from: DEFAULT_FROM,
+            to: orderData.customer_email,
+            subject: `Order Confirmed #${orderData.id} - Tylicious Grillz 🔥`,
+            html: receiptHtml,
+            text: receiptText,
+            headers: priorityHeaders,
+          })
+          .then((res) => {
+            if (res.error) {
+              console.error('❌ Resend customer receipt error:', res.error);
+              return { type: 'customer' as const, success: false, error: res.error };
+            }
+            console.log(`✅ Order receipt emailed to customer: ${orderData.customer_email} (ID: ${res.data?.id})`);
+            return { type: 'customer' as const, success: true, data: res.data };
+          })
+          .catch((err) => {
+            console.error('❌ Exception sending customer receipt:', err);
+            return { type: 'customer' as const, success: false, error: err };
+          })
+      );
     } else {
       console.warn('⚠️ Order has no customer_email:', orderData);
     }
 
-    // 5. Send Restaurant Staff New Order Alert
-    try {
-      const staffRes = await resend.emails.send({
-        from: DEFAULT_FROM,
-        to: RESTAURANT_OPERATIONAL_EMAIL,
-        subject: `🚨 ACTION REQUIRED: New Order #${orderData.id} Received (£${Number(orderData.total).toFixed(2)})`,
-        html: alertHtml,
-      });
+    // Kitchen / Staff Notification Task
+    sendTasks.push(
+      resend.emails
+        .send({
+          from: DEFAULT_FROM,
+          to: RESTAURANT_OPERATIONAL_EMAIL,
+          subject: `🚨 ACTION REQUIRED: New Order #${orderData.id} Received (£${Number(orderData.total).toFixed(2)})`,
+          html: alertHtml,
+          text: alertText,
+          headers: priorityHeaders,
+        })
+        .then((res) => {
+          if (res.error) {
+            console.error('❌ Resend staff alert error:', res.error);
+            return { type: 'staff' as const, success: false, error: res.error };
+          }
+          console.log(`✅ Kitchen order alert sent to: ${RESTAURANT_OPERATIONAL_EMAIL} (ID: ${res.data?.id})`);
+          return { type: 'staff' as const, success: true, data: res.data };
+        })
+        .catch((err) => {
+          console.error('❌ Exception sending staff alert:', err);
+          return { type: 'staff' as const, success: false, error: err };
+        })
+    );
 
-      if (staffRes.error) {
-        console.error('❌ Resend staff alert error:', staffRes.error);
-        results.staff = { error: staffRes.error };
-      } else {
-        console.log(`✅ Kitchen order alert sent to: ${RESTAURANT_OPERATIONAL_EMAIL} (ID: ${staffRes.data?.id})`);
-        results.staff = { success: true, id: staffRes.data?.id };
+    const outcomes = await Promise.all(sendTasks);
+    for (const outcome of outcomes) {
+      if (outcome.type === 'customer') {
+        results.customer = outcome.success ? { success: true, id: (outcome.data as { id?: string })?.id } : { error: outcome.error };
+      } else if (outcome.type === 'staff') {
+        results.staff = outcome.success ? { success: true, id: (outcome.data as { id?: string })?.id } : { error: outcome.error };
       }
-    } catch (staffErr) {
-      console.error('❌ Exception sending staff alert:', staffErr);
-      results.staff = { error: staffErr };
+    }
+
+    // If order is stored in Supabase, update receipt_sent status
+    if (orderData.id && results.customer && (results.customer as { success?: boolean }).success) {
+      try {
+        await supabaseAdmin
+          .from('orders')
+          .update({ receipt_sent: true })
+          .eq('id', orderData.id);
+      } catch (markErr) {
+        console.warn('⚠️ Could not update receipt_sent flag in orders table:', markErr);
+      }
     }
 
     return { success: true, orderId: orderData.id, itemCount: orderItems.length, results };
